@@ -54,84 +54,86 @@ const TPL = `<div class="note-detail-content-widget note-detail-printable">
 </div>`;
 
 const CONTENT_WIDGETS = {
-  _optionsAppearance: [
-    ThemeOptions,
-    FontsOptions,
-    ZoomFactorOptions,
-    NativeTitleBarOptions,
-    MaxContentWidthOptions,
-    RibbonOptions,
-  ],
-  _optionsShortcuts: [KeyboardShortcutsOptions],
-  _optionsTextNotes: [
-    HeadingStyleOptions,
-    TableOfContentsOptions,
-    HighlightsListOptions,
-    TextAutoReadOnlySizeOptions,
-  ],
-  _optionsCodeNotes: [
-    VimKeyBindingsOptions,
-    WrapLinesOptions,
-    CodeAutoReadOnlySizeOptions,
-    CodeMimeTypesOptions,
-  ],
-  _optionsMFA: [MultiFactorAuthenticationOptions],
-  _optionsImages: [ImageOptions],
-  _optionsSpellcheck: [SpellcheckOptions],
-  _optionsPassword: [PasswordOptions],
-  _optionsEtapi: [EtapiOptions],
-  _optionsBackup: [BackupOptions],
-  _optionsSync: [SyncOptions],
-  _optionsOther: [
-    SearchEngineOptions,
-    TrayOptions,
-    NoteErasureTimeoutOptions,
-    AttachmentErasureTimeoutOptions,
-    RevisionsSnapshotIntervalOptions,
-    NetworkConnectionsOptions,
-  ],
-  _optionsAdvanced: [
-    DatabaseIntegrityCheckOptions,
-    ConsistencyChecksOptions,
-    DatabaseAnonymizationOptions,
-    AdvancedSyncOptions,
-    VacuumDatabaseOptions,
-  ],
-  _backendLog: [BackendLogWidget],
+    _optionsAppearance: [
+        ThemeOptions,
+        FontsOptions,
+        ZoomFactorOptions,
+        NativeTitleBarOptions,
+        MaxContentWidthOptions,
+        RibbonOptions,
+    ],
+    _optionsShortcuts: [KeyboardShortcutsOptions],
+    _optionsTextNotes: [
+        HeadingStyleOptions,
+        TableOfContentsOptions,
+        HighlightsListOptions,
+        TextAutoReadOnlySizeOptions,
+    ],
+    _optionsCodeNotes: [
+        VimKeyBindingsOptions,
+        WrapLinesOptions,
+        CodeAutoReadOnlySizeOptions,
+        CodeMimeTypesOptions,
+    ],
+    _optionsMFA: [MultiFactorAuthenticationOptions],
+    _optionsImages: [ImageOptions],
+    _optionsSpellcheck: [SpellcheckOptions],
+    _optionsPassword: [PasswordOptions],
+    _optionsEtapi: [EtapiOptions],
+    _optionsBackup: [BackupOptions],
+    _optionsSync: [SyncOptions],
+    _optionsOther: [
+        SearchEngineOptions,
+        TrayOptions,
+        NoteErasureTimeoutOptions,
+        AttachmentErasureTimeoutOptions,
+        RevisionsSnapshotIntervalOptions,
+        NetworkConnectionsOptions,
+    ],
+    _optionsAdvanced: [
+        DatabaseIntegrityCheckOptions,
+        ConsistencyChecksOptions,
+        DatabaseAnonymizationOptions,
+        AdvancedSyncOptions,
+        VacuumDatabaseOptions,
+    ],
+    _backendLog: [BackendLogWidget],
 };
 
 export default class ContentWidgetTypeWidget extends TypeWidget {
-  static getType() {
-    return "contentWidget";
-  }
-
-  doRender() {
-    this.$widget = $(TPL);
-    this.$content = this.$widget.find(".note-detail-content-widget-content");
-
-    super.doRender();
-  }
-
-  async doRefresh(note) {
-    this.$content.empty();
-    this.children = [];
-
-    const contentWidgets = CONTENT_WIDGETS[note.noteId];
-
-    if (contentWidgets) {
-      for (const clazz of contentWidgets) {
-        const widget = new clazz();
-
-        await widget.handleEvent("setNoteContext", {
-          noteContext: this.noteContext,
-        });
-        this.child(widget);
-
-        this.$content.append(widget.render());
-        await widget.refresh();
-      }
-    } else {
-      this.$content.append(`Unknown widget for "${note.noteId}"`);
+    static getType() {
+        return "contentWidget";
     }
-  }
+    2;
+    doRender() {
+        this.$widget = $(TPL);
+        this.$content = this.$widget.find(
+            ".note-detail-content-widget-content"
+        );
+
+        super.doRender();
+    }
+
+    async doRefresh(note) {
+        this.$content.empty();
+        this.children = [];
+
+        const contentWidgets = CONTENT_WIDGETS[note.noteId];
+
+        if (contentWidgets) {
+            for (const clazz of contentWidgets) {
+                const widget = new clazz();
+
+                await widget.handleEvent("setNoteContext", {
+                    noteContext: this.noteContext,
+                });
+                this.child(widget);
+
+                this.$content.append(widget.render());
+                await widget.refresh();
+            }
+        } else {
+            this.$content.append(`Unknown widget for "${note.noteId}"`);
+        }
+    }
 }
