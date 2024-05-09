@@ -36,112 +36,136 @@ const TPL = `
   </div>
     <br>
  <h4> Generate TOTP Secret </h4>
-    <span class="totp-secret" >  </span>
-    <br>
-    <button class="regenerate-totp" disabled="true"> Regenerate TOTP Secret </button>
+    <div>
+        <span class="totp-secret" >  </span>
+        <br>
+        <button class="regenerate-totp" disabled="true"> Regenerate TOTP Secret </button>
+    </div>
 </div>`;
 
 export default class MultiFactorAuthenticationOptions extends OptionsWidget {
-    doRender() {
-        this.$widget = $(TPL);
+  doRender() {
+    this.$widget = $(TPL);
 
-        this.$mfaHeadding = this.$widget.find(".mfa-heading");
-        this.$regenerateTotpButton = this.$widget.find(".regenerate-totp");
-        this.$totpEnabled = this.$widget.find(".totp-enabled");
-        this.$totpSecret = this.$widget.find(".totp-secret");
-        this.$totpSecretInput = this.$widget.find(".totp-secret-input");
-        this.$saveTotpButton = this.$widget.find(".save-totp");
-        this.$password = this.$widget.find(".password");
+    this.$mfaHeadding = this.$widget.find(".mfa-heading");
+    this.$regenerateTotpButton = this.$widget.find(".regenerate-totp");
+    this.$totpEnabled = this.$widget.find(".totp-enabled");
+    this.$totpSecret = this.$widget.find(".totp-secret");
+    this.$totpSecretInput = this.$widget.find(".totp-secret-input");
+    this.$saveTotpButton = this.$widget.find(".save-totp");
+    this.$password = this.$widget.find(".password");
 
-        this.$mfaHeadding.text("Time-Based One Time Password (TOTP)");
-        this.generateKey();
+    this.$mfaHeadding.text("Time-Based One Time Password (TOTP)");
+    this.generateKey();
 
-        this.$totpEnabled.on("change", async () => {
-            this.updateSecret();
-        });
+    this.$totpEnabled.on("change", async () => {
+      this.updateSecret();
+    });
 
-        this.$regenerateTotpButton.on("click", async () => {
-            this.generateKey();
-        });
+    this.$regenerateTotpButton.on("click", async () => {
+      this.generateKey();
+    });
 
-        this.$saveTotpButton.on("click", async () => {
-            this.saveTotpSecret();
-        });
+    this.$saveTotpButton.on("click", async () => {
+      this.saveTotpSecret();
+    });
 
-        this.$protectedSessionTimeout = this.$widget.find(
-            ".protected-session-timeout-in-seconds"
-        );
-        this.$protectedSessionTimeout.on("change", () =>
-            this.updateOption(
-                "protectedSessionTimeout",
-                this.$protectedSessionTimeout.val()
-            )
-        );
-    }
+    this.$protectedSessionTimeout = this.$widget.find(
+      ".protected-session-timeout-in-seconds"
+    );
+    this.$protectedSessionTimeout.on("change", () =>
+      this.updateOption(
+        "protectedSessionTimeout",
+        this.$protectedSessionTimeout.val()
+      )
+    );
+  }
 
-    async updateSecret() {
-        if (this.$totpEnabled.prop("checked")) server.post("totp/enable");
-        else server.post("totp/disable");
-    }
+  async updateSecret() {
+    if (this.$totpEnabled.prop("checked")) server.post("totp/enable");
+    else server.post("totp/disable");
+  }
 
-    async generateKey() {
-        server.get("totp/generate").then((result) => {
-            if (result.success) {
-                this.$totpSecret.text(result.message);
-            } else {
-                toastService.showError(result.message);
-            }
-        });
-    }
+  async generateKey() {
+    // DEBUG ONLY
+    const recoveryCodes = {
+      code1: "testCode1",
+      code2: "testCode2",
+      code3: "testCode3",
+    };
 
-    optionsLoaded(options) {
-        server.get("totp/enabled").then((result) => {
-            if (result.success) {
-                this.$totpEnabled.prop("checked", result.message);
-                this.$totpSecretInput.prop("disabled", !result.message);
-                this.$saveTotpButton.prop("disabled", !result.message);
-                this.$totpSecret.prop("disapbled", !result.message);
-                this.$regenerateTotpButton.prop("disabled", !result.message);
-                this.$password.prop("disabled", !result.message);
-            } else {
-                toastService.showError(result.message);
-            }
-        });
+    server.post("totp_recovery/set", {
+      recoveryCodes: JSON.stringify(recoveryCodes),
+    });
 
-        this.$protectedSessionTimeout.val(options.protectedSessionTimeout);
-    }
-
-    saveTotpSecret() {
-        const key = this.$totpSecretInput.val();
-        const regex = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
-
-        if (key.length != 52) {
-            toastService.showError("Invalid Secret", 2000);
-            return;
+    server
+      .post("totp_recovery/verify", { recovery_code_guess: "testCode2" })
+      .then((result) => {
+        console.log(result);
+        if (result.success) {
+          toastService.showError("VALID");
+        } else {
+          toastService.showError("INVALID");
         }
-        if (regex.test(key)) {
-            toastService.showError("Invalid Secret", 2000);
-            return;
-        }
+      });
 
-        server
-            .post("totp/set", {
-                secret: this.$totpSecretInput.val(),
-                password: this.$password.val(),
-            })
-            .then((result) => {
-                if (result.success) {
-                    toastService.showError(
-                        "Password has been changed. Trilium will be reloaded after you press OK."
-                    );
+    server.get("totp/generate").then((result) => {
+      if (result.success) {
+        this.$totpSecret.text(result.message);
+      } else {
+        toastService.showError(result.message);
+      }
+    });
+  }
 
-                    // password changed so current protected session is invalid and needs to be cleared
-                    protectedSessionHolder.resetProtectedSession();
-                } else {
-                    toastService.showError(result.message);
-                }
-            });
+  optionsLoaded(options) {
+    server.get("totp/enabled").then((result) => {
+      if (result.success) {
+        this.$totpEnabled.prop("checked", result.message);
+        this.$totpSecretInput.prop("disabled", !result.message);
+        this.$saveTotpButton.prop("disabled", !result.message);
+        this.$totpSecret.prop("disapbled", !result.message);
+        this.$regenerateTotpButton.prop("disabled", !result.message);
+        this.$password.prop("disabled", !result.message);
+      } else {
+        toastService.showError(result.message);
+      }
+    });
 
-        return false;
+    this.$protectedSessionTimeout.val(options.protectedSessionTimeout);
+  }
+
+  saveTotpSecret() {
+    const key = this.$totpSecretInput.val();
+    const regex = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
+
+    if (key.length != 52) {
+      toastService.showError("Invalid Secret", 2000);
+      return;
     }
+    if (regex.test(key)) {
+      toastService.showError("Invalid Secret", 2000);
+      return;
+    }
+
+    server
+      .post("totp/set", {
+        secret: this.$totpSecretInput.val(),
+        password: this.$password.val(),
+      })
+      .then((result) => {
+        if (result.success) {
+          toastService.showError(
+            "Password has been changed. Trilium will be reloaded after you press OK."
+          );
+
+          // password changed so current protected session is invalid and needs to be cleared
+          protectedSessionHolder.resetProtectedSession();
+        } else {
+          toastService.showError(result.message);
+        }
+      });
+
+    return false;
+  }
 }
