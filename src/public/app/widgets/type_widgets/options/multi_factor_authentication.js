@@ -73,7 +73,7 @@ const TPL = `
         </tbody>
     </table>
     <br>
-      <button class="regenerate-totp" disabled="true"> Generate Recovery Keys </button>
+      <button class="generate-recovery-code" disabled="true"> Generate Recovery Keys </button>
   </div>
 </div>`;
 
@@ -88,6 +88,9 @@ export default class MultiFactorAuthenticationOptions extends OptionsWidget {
         this.$totpSecretInput = this.$widget.find(".totp-secret-input");
         this.$saveTotpButton = this.$widget.find(".save-totp");
         this.$password = this.$widget.find(".password");
+        this.$generateRecoveryCodeButton = this.$widget.find(
+            ".generate-recovery-code"
+        );
         this.$recoveryKeys = [];
 
         for (let i = 0; i < 8; i++)
@@ -99,6 +102,10 @@ export default class MultiFactorAuthenticationOptions extends OptionsWidget {
 
         this.$totpEnabled.on("change", async () => {
             this.updateSecret();
+        });
+
+        this.$generateRecoveryCodeButton.on("click", async () => {
+            this.setRecoveryKeys();
         });
 
         this.$regenerateTotpButton.on("click", async () => {
@@ -135,6 +142,9 @@ export default class MultiFactorAuthenticationOptions extends OptionsWidget {
 
             if (!result.keysExist) {
                 this.keyFiller(Array(8).fill("No key set"));
+                this.$generateRecoveryCodeButton.text(
+                    "Generate Recovery Codes"
+                );
                 return;
             }
 
@@ -147,6 +157,8 @@ export default class MultiFactorAuthenticationOptions extends OptionsWidget {
                 return;
             }
 
+            this.keyFiller(JSON.parse(result.recoveryCodes));
+            // Continue here
             server.post("totp_recovery/set", {
                 recoveryCodes: JSON.stringify(result.recoveryCodes),
             });
@@ -204,6 +216,10 @@ export default class MultiFactorAuthenticationOptions extends OptionsWidget {
                 this.$totpSecret.prop("disapbled", !result.message);
                 this.$regenerateTotpButton.prop("disabled", !result.message);
                 this.$password.prop("disabled", !result.message);
+                this.$generateRecoveryCodeButton.prop(
+                    "disabled",
+                    !result.message
+                );
             } else {
                 toastService.showError(result.message);
             }

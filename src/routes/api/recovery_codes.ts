@@ -23,11 +23,16 @@ function checkForRecoveryKeys() {
 }
 
 function generateRecoveryCodes() {
-    const recoveryCodes = {
-        code1: randomBytes(16).toString("base64"),
-        code2: randomBytes(16).toString("base64"),
-        code3: randomBytes(16).toString("base64"),
-    };
+    const recoveryCodes = [
+        randomBytes(16).toString("base64"),
+        randomBytes(16).toString("base64"),
+        randomBytes(16).toString("base64"),
+        randomBytes(16).toString("base64"),
+        randomBytes(16).toString("base64"),
+        randomBytes(16).toString("base64"),
+        randomBytes(16).toString("base64"),
+        randomBytes(16).toString("base64"),
+    ];
 
     return { success: true, recoveryCodes: JSON.stringify(recoveryCodes) };
 }
