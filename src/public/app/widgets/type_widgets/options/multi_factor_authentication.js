@@ -1,7 +1,7 @@
-import server from "../../../services/server.js";
-import protectedSessionHolder from "../../../services/protected_session_holder.js";
-import toastService from "../../../services/toast.js";
-import OptionsWidget from "./options_widget.js";
+import server from '../../../services/server.js';
+import protectedSessionHolder from '../../../services/protected_session_holder.js';
+import toastService from '../../../services/toast.js';
+import OptionsWidget from './options_widget.js';
 
 const TPL = `
 <div class="options-section">
@@ -84,57 +84,57 @@ export default class MultiFactorAuthenticationOptions extends OptionsWidget {
   doRender() {
     this.$widget = $(TPL);
 
-    this.$mfaHeadding = this.$widget.find(".mfa-heading");
-    this.$regenerateTotpButton = this.$widget.find(".regenerate-totp");
-    this.$totpEnabled = this.$widget.find(".totp-enabled");
-    this.$totpSecret = this.$widget.find(".totp-secret");
-    this.$totpSecretInput = this.$widget.find(".totp-secret-input");
-    this.$saveTotpButton = this.$widget.find(".save-totp");
-    this.$password = this.$widget.find(".password");
-    this.$generateRecoveryCodeButton = this.$widget.find(".generate-recovery-code");
+    this.$mfaHeadding = this.$widget.find('.mfa-heading');
+    this.$regenerateTotpButton = this.$widget.find('.regenerate-totp');
+    this.$totpEnabled = this.$widget.find('.totp-enabled');
+    this.$totpSecret = this.$widget.find('.totp-secret');
+    this.$totpSecretInput = this.$widget.find('.totp-secret-input');
+    this.$saveTotpButton = this.$widget.find('.save-totp');
+    this.$password = this.$widget.find('.password');
+    this.$generateRecoveryCodeButton = this.$widget.find('.generate-recovery-code');
     this.$recoveryKeys = [];
 
-    for (let i = 0; i < 8; i++) this.$recoveryKeys.push(this.$widget.find(".key_" + i));
+    for (let i = 0; i < 8; i++) this.$recoveryKeys.push(this.$widget.find('.key_' + i));
 
-    this.$mfaHeadding.text("Time-Based One Time Password (TOTP)");
+    this.$mfaHeadding.text('Time-Based One Time Password (TOTP)');
 
-    this.$totpEnabled.on("change", async () => {
+    this.$totpEnabled.on('change', async () => {
       this.updateSecret();
     });
 
-    this.$generateRecoveryCodeButton.on("click", async () => {
+    this.$generateRecoveryCodeButton.on('click', async () => {
       this.setRecoveryKeys();
     });
 
-    this.$regenerateTotpButton.on("click", async () => {
+    this.$regenerateTotpButton.on('click', async () => {
       this.generateKey();
     });
 
-    this.$saveTotpButton.on("click", async () => {
+    this.$saveTotpButton.on('click', async () => {
       this.saveTotpSecret();
     });
 
-    this.$protectedSessionTimeout = this.$widget.find(".protected-session-timeout-in-seconds");
-    this.$protectedSessionTimeout.on("change", () =>
-      this.updateOption("protectedSessionTimeout", this.$protectedSessionTimeout.val())
+    this.$protectedSessionTimeout = this.$widget.find('.protected-session-timeout-in-seconds');
+    this.$protectedSessionTimeout.on('change', () =>
+      this.updateOption('protectedSessionTimeout', this.$protectedSessionTimeout.val())
     );
 
     this.displayRecoveryKeys();
   }
 
   async updateSecret() {
-    if (this.$totpEnabled.prop("checked")) server.post("totp/enable");
-    else server.post("totp/disable");
+    if (this.$totpEnabled.prop('checked')) server.post('totp/enable');
+    else server.post('totp/disable');
   }
 
   async setRecoveryKeys() {
-    server.get("totp_recovery/generate").then((result) => {
+    server.get('totp_recovery/generate').then((result) => {
       if (!result.success) {
-        toastService.showError("Error in revevery code generation!");
+        toastService.showError('Error in revevery code generation!');
         return;
       }
       this.keyFiller(result.recoveryCodes);
-      server.post("totp_recovery/set", {
+      server.post('totp_recovery/set', {
         recoveryCodes: result.recoveryCodes,
       });
     });
@@ -143,12 +143,12 @@ export default class MultiFactorAuthenticationOptions extends OptionsWidget {
   async keyFiller(values) {
     // Forces values to be a string so it doesn't error out when I split.
     // Will be a non-issue when I update everything to typescript.
-    const keys = (values + "").split(",");
+    const keys = (values + '').split(',');
     for (let i = 0; i < keys.length; i++) this.$recoveryKeys[i].text(keys[i]);
   }
 
   async generateKey() {
-    server.get("totp/generate").then((result) => {
+    server.get('totp/generate').then((result) => {
       if (result.success) {
         this.$totpSecret.text(result.message);
       } else {
@@ -158,15 +158,15 @@ export default class MultiFactorAuthenticationOptions extends OptionsWidget {
   }
 
   optionsLoaded(options) {
-    server.get("totp/enabled").then((result) => {
+    server.get('totp/enabled').then((result) => {
       if (result.success) {
-        this.$totpEnabled.prop("checked", result.message);
-        this.$totpSecretInput.prop("disabled", !result.message);
-        this.$saveTotpButton.prop("disabled", !result.message);
-        this.$totpSecret.prop("disapbled", !result.message);
-        this.$regenerateTotpButton.prop("disabled", !result.message);
-        this.$password.prop("disabled", !result.message);
-        this.$generateRecoveryCodeButton.prop("disabled", !result.message);
+        this.$totpEnabled.prop('checked', result.message);
+        this.$totpSecretInput.prop('disabled', !result.message);
+        this.$saveTotpButton.prop('disabled', !result.message);
+        this.$totpSecret.prop('disapbled', !result.message);
+        this.$regenerateTotpButton.prop('disabled', !result.message);
+        this.$password.prop('disabled', !result.message);
+        this.$generateRecoveryCodeButton.prop('disabled', !result.message);
       } else {
         toastService.showError(result.message);
       }
@@ -180,22 +180,22 @@ export default class MultiFactorAuthenticationOptions extends OptionsWidget {
     const regex = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
 
     if (key.length != 52) {
-      toastService.showError("Invalid Secret", 2000);
+      toastService.showError('Invalid Secret', 2000);
       return;
     }
     if (regex.test(key)) {
-      toastService.showError("Invalid Secret", 2000);
+      toastService.showError('Invalid Secret', 2000);
       return;
     }
 
     server
-      .post("totp/set", {
+      .post('totp/set', {
         secret: this.$totpSecretInput.val(),
         password: this.$password.val(),
       })
       .then((result) => {
         if (result.success) {
-          toastService.showError("Password has been changed. Trilium will be reloaded after you press OK.");
+          toastService.showError('Password has been changed. Trilium will be reloaded after you press OK.');
 
           // password changed so current protected session is invalid and needs to be cleared
           protectedSessionHolder.resetProtectedSession();
@@ -208,21 +208,21 @@ export default class MultiFactorAuthenticationOptions extends OptionsWidget {
   }
 
   displayRecoveryKeys() {
-    server.get("totp_recovery/enabled").then((result) => {
+    server.get('totp_recovery/enabled').then((result) => {
       if (!result.success) {
-        this.keyFiller(Array(8).fill("Error generating recovery keys!"));
+        this.keyFiller(Array(8).fill('Error generating recovery keys!'));
         return;
       }
 
       if (!result.keysExist) {
-        this.keyFiller(Array(8).fill("No key set"));
-        this.$generateRecoveryCodeButton.text("Generate Recovery Codes");
+        this.keyFiller(Array(8).fill('No key set'));
+        this.$generateRecoveryCodeButton.text('Generate Recovery Codes');
         return;
       }
     });
-    server.get("totp_recovery/used").then((result) => {
-      this.keyFiller((result.usedRecoveryCodes + "").split(","));
-      this.$generateRecoveryCodeButton.text("Regenerate Recovery Codes");
+    server.get('totp_recovery/used').then((result) => {
+      this.keyFiller((result.usedRecoveryCodes + '').split(','));
+      this.$generateRecoveryCodeButton.text('Regenerate Recovery Codes');
     });
   }
 }
