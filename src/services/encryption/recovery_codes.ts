@@ -15,74 +15,67 @@ function setRecoveryCodes(recoveryCodes: string) {
   let encryptedRecoveryCodes = cipher.update(recoveryCodes, "utf-8", "hex");
 
   sql.transactional(() => {
-    optionService.createOption(
-      "recoveryCodeInitialVector",
-      iv.toString("hex"),
-      true
-    );
-    optionService.createOption(
-      "recoveryCodeSecurityKey",
-      securityKey.toString("hex"),
-      true
-    );
-    optionService.createOption(
-      "recoveryCodesEncrypted",
-      encryptedRecoveryCodes + cipher.final("hex"),
-      true
-    );
-    optionService.createOption("encryptedRecoveryCodes", "true", true);
+    optionService.setOption("recoveryCodeInitialVector", iv.toString("hex"));
+    optionService.setOption("recoveryCodeSecurityKey", securityKey.toString("hex"));
+    optionService.setOption("recoveryCodesEncrypted", encryptedRecoveryCodes + cipher.final("hex"));
+    optionService.setOption("encryptedRecoveryCodes", "true");
     return true;
   });
   return false;
 }
-
-function verifyRecoveryCode(recoveryCodeGuess: string) {
+function getRecoveryCodes() {
   if (!isRecoveryCodeSet()) {
-    throw new Error(
-      "Recovery codes have not been set yet, so it cannot be changed. Use 'setRecoveryCodes' instead."
-    );
+    throw new Error("Recovery codes have not been set yet, so it cannot be changed. Use 'setRecoveryCodes' instead.");
   }
 
-  const recoveryCodeVerification = sql.transactional(() => {
-    const iv = Buffer.from(
-      optionService.getOption("recoveryCodeInitialVector"),
-      "hex"
-    );
-    const securityKey = Buffer.from(
-      optionService.getOption("recoveryCodeSecurityKey"),
-      "hex"
-    );
-    const encryptedRecoveryCodes = optionService.getOption(
-      "recoveryCodesEncrypted"
-    );
+  return sql.transactional(() => {
+    const iv = Buffer.from(optionService.getOption("recoveryCodeInitialVector"), "hex");
+    const securityKey = Buffer.from(optionService.getOption("recoveryCodeSecurityKey"), "hex");
+    const encryptedRecoveryCodes = optionService.getOption("recoveryCodesEncrypted");
 
     const decipher = crypto.createDecipheriv("aes-256-cbc", securityKey, iv);
-    const decryptedData = decipher.update(
-      encryptedRecoveryCodes,
-      "hex",
-      "utf-8"
-    );
+    const decryptedData = decipher.update(encryptedRecoveryCodes, "hex", "utf-8");
 
     const decryptedString = decryptedData + decipher.final("utf-8");
-    const editedString = decryptedString.replaceAll("\\", "");
-    const finalString = editedString.substring(1, editedString.length - 1);
-    const finalParse = JSON.parse(finalString);
-
-    for (const recoveryCode in finalParse) {
-      if (finalParse[recoveryCode] === recoveryCodeGuess) {
-        updateRecoveryCodes(finalParse[recoveryCode]);
-        return true;
-      }
-    }
-
-    return false;
+    return decryptedString.split(",");
   });
-
-  return recoveryCodeVerification;
 }
 
-function updateRecoveryCodes(codeToRemove: string) {
-  // TODO: Remove used recovery code and reset
+function removeRecoveryCode(usedCode: string) {
+  const oldCodes: string[] = getRecoveryCodes();
+  const today = new Date();
+  oldCodes[oldCodes.indexOf(usedCode)] = today.toJSON().replace(/-/g, "/");
+  setRecoveryCodes(oldCodes.toString());
 }
 
-export = { setRecoveryCodes, verifyRecoveryCode };
+function verifyRecoveryCode(recoveryCodeGuess: string) {
+  const recoveryCodeRegex = RegExp(/^.{22}==$/gm);
+  if (!recoveryCodeRegex.test(recoveryCodeGuess)) {
+    return false;
+  }
+
+  const recoveryCodes = getRecoveryCodes();
+  var loginSuccess = false;
+  recoveryCodes.forEach((recoveryCode: string) => {
+    if (recoveryCodeGuess === recoveryCode) {
+      removeRecoveryCode(recoveryCode);
+      loginSuccess = true;
+      return;
+    }
+  });
+  return loginSuccess;
+}
+
+function getUsedRecoveryCodes() {
+  const dateRegex = RegExp(/^\d{4}\/\d{2}\/\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/gm);
+  const recoveryCodes = getRecoveryCodes();
+  const usedStatus: string[] = [];
+
+  recoveryCodes.forEach((recoveryKey: string) => {
+    if (dateRegex.test(recoveryKey)) usedStatus.push("Used: " + recoveryKey);
+    else usedStatus.push("Recovery code " + recoveryCodes.indexOf(recoveryKey) + " is unused");
+  });
+  return usedStatus;
+}
+
+export = { setRecoveryCodes, verifyRecoveryCode, getUsedRecoveryCodes, isRecoveryCodeSet };

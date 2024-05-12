@@ -45,9 +45,9 @@ const TPL = `
         <button class="regenerate-totp" disabled="true"> Regenerate TOTP Secret </button>
     </div>
     <br>
-    <h4> Recovery Keys </h4>
+    <h4> Single Sign-on Recovery Keys </h4>
         <div>
-        <span >Recovery keys are used to login in the event you cannot access your Authenticator codes. Keep them somewhere safe and secure. </span>
+        <span >Single sign-on recovery keys are used to login in the event you cannot access your Authenticator codes. Keep them somewhere safe and secure. </span>
         <br><br>
         <span class="alert alert-warning" role="alert" style="font-weight: bold; color: red !important;">After a recovery key is used it cannot be used again.</span>
         <br><br>
@@ -91,13 +91,10 @@ export default class MultiFactorAuthenticationOptions extends OptionsWidget {
     this.$totpSecretInput = this.$widget.find(".totp-secret-input");
     this.$saveTotpButton = this.$widget.find(".save-totp");
     this.$password = this.$widget.find(".password");
-    this.$generateRecoveryCodeButton = this.$widget.find(
-      ".generate-recovery-code"
-    );
+    this.$generateRecoveryCodeButton = this.$widget.find(".generate-recovery-code");
     this.$recoveryKeys = [];
 
-    for (let i = 0; i < 8; i++)
-      this.$recoveryKeys.push(this.$widget.find(".key_" + i));
+    for (let i = 0; i < 8; i++) this.$recoveryKeys.push(this.$widget.find(".key_" + i));
 
     this.$mfaHeadding.text("Time-Based One Time Password (TOTP)");
 
@@ -117,14 +114,9 @@ export default class MultiFactorAuthenticationOptions extends OptionsWidget {
       this.saveTotpSecret();
     });
 
-    this.$protectedSessionTimeout = this.$widget.find(
-      ".protected-session-timeout-in-seconds"
-    );
+    this.$protectedSessionTimeout = this.$widget.find(".protected-session-timeout-in-seconds");
     this.$protectedSessionTimeout.on("change", () =>
-      this.updateOption(
-        "protectedSessionTimeout",
-        this.$protectedSessionTimeout.val()
-      )
+      this.updateOption("protectedSessionTimeout", this.$protectedSessionTimeout.val())
     );
 
     this.displayRecoveryKeys();
@@ -141,18 +133,18 @@ export default class MultiFactorAuthenticationOptions extends OptionsWidget {
         toastService.showError("Error in revevery code generation!");
         return;
       }
-
-      this.keyFiller(JSON.parse(result.recoveryCodes));
-      // Continue here
+      this.keyFiller(result.recoveryCodes);
       server.post("totp_recovery/set", {
-        recoveryCodes: JSON.stringify(result.recoveryCodes),
+        recoveryCodes: result.recoveryCodes,
       });
     });
   }
 
   async keyFiller(values) {
-    console.log(values);
-    for (let i = 0; i < 8; i++) this.$recoveryKeys[i].text(values[i]);
+    // Forces values to be a string so it doesn't error out when I split.
+    // Will be a non-issue when I update everything to typescript.
+    const keys = (values + "").split(",");
+    for (let i = 0; i < keys.length; i++) this.$recoveryKeys[i].text(keys[i]);
   }
 
   async generateKey() {
@@ -203,9 +195,7 @@ export default class MultiFactorAuthenticationOptions extends OptionsWidget {
       })
       .then((result) => {
         if (result.success) {
-          toastService.showError(
-            "Password has been changed. Trilium will be reloaded after you press OK."
-          );
+          toastService.showError("Password has been changed. Trilium will be reloaded after you press OK.");
 
           // password changed so current protected session is invalid and needs to be cleared
           protectedSessionHolder.resetProtectedSession();
@@ -219,7 +209,6 @@ export default class MultiFactorAuthenticationOptions extends OptionsWidget {
 
   displayRecoveryKeys() {
     server.get("totp_recovery/enabled").then((result) => {
-      console.log(result);
       if (!result.success) {
         this.keyFiller(Array(8).fill("Error generating recovery keys!"));
         return;
@@ -230,9 +219,10 @@ export default class MultiFactorAuthenticationOptions extends OptionsWidget {
         this.$generateRecoveryCodeButton.text("Generate Recovery Codes");
         return;
       }
-
-      this.keyFiller(Array(8).fill("Key set. Cannot view."));
-      return;
+    });
+    server.get("totp_recovery/used").then((result) => {
+      this.keyFiller((result.usedRecoveryCodes + "").split(","));
+      this.$generateRecoveryCodeButton.text("Regenerate Recovery Codes");
     });
   }
 }
