@@ -1,5 +1,5 @@
 import becca = require('../becca/becca');
-import { OptionRow } from '../becca/entities/rows';
+import {OptionRow} from '../becca/entities/rows';
 import sql = require('./sql');
 
 function getOptionOrNull(name: string): string | null {

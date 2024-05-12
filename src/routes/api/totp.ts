@@ -1,7 +1,7 @@
 import options = require('../../services/options');
 import totp_secret = require('../../services/encryption/totp_secret');
 import passwordEncryptionService = require('../../services/encryption/password_encryption');
-import { Request } from 'express';
+import {Request} from 'express';
 import totp_fs = require('../../services/totp_secret');
 import ValidationError = require('../../errors/validation_error');
 const speakeasy = require('speakeasy');
@@ -18,23 +18,23 @@ function verifyOTPToken(guessedToken: any) {
 }
 
 function generateSecret() {
-    return { success: 'true', message: speakeasy.generateSecret().base32 };
+    return {success: 'true', message: speakeasy.generateSecret().base32};
 }
 
 function checkForTOTP() {
     const totpEnabled = options.getOptionBool('totpEnabled');
-    return { success: 'true', message: totpEnabled };
+    return {success: 'true', message: totpEnabled};
 }
 
 function enableTOTP() {
     options.setOption('totpEnabled', true);
-    return { success: 'true' };
+    return {success: 'true'};
 }
 
 function disableTOTP() {
     options.setOption('totpEnabled', false);
 
-    return { success: totp_fs.removeTotpSecret() };
+    return {success: totp_fs.removeTotpSecret()};
 }
 
 function setTotpSecret(req: Request) {

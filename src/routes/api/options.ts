@@ -4,7 +4,7 @@ import optionService = require('../../services/options');
 import log = require('../../services/log');
 import searchService = require('../../services/search/services/search');
 import ValidationError = require('../../errors/validation_error');
-import { Request } from 'express';
+import {Request} from 'express';
 
 // options allowed to be updated directly in the Options dialog
 const ALLOWED_OPTIONS = new Set([
@@ -78,7 +78,7 @@ function getOptions() {
 }
 
 function updateOption(req: Request) {
-    const { name, value } = req.params;
+    const {name, value} = req.params;
 
     if (!update(name, value)) {
         throw new ValidationError('not allowed option to change');

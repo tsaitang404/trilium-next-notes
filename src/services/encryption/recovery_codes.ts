@@ -80,4 +80,4 @@ function getUsedRecoveryCodes() {
     return usedStatus;
 }
 
-export = { setRecoveryCodes, verifyRecoveryCode, getUsedRecoveryCodes, isRecoveryCodeSet };
+export = {setRecoveryCodes, verifyRecoveryCode, getUsedRecoveryCodes, isRecoveryCodeSet};

@@ -9,8 +9,8 @@ import assetPath = require('../services/asset_path');
 import appPath = require('../services/app_path');
 import ValidationError = require('../errors/validation_error');
 import totp_secret = require('../services/totp_secret');
-import { Request, Response } from 'express';
-import { AppRequest } from './route-interface';
+import {Request, Response} from 'express';
+import {AppRequest} from './route-interface';
 import recoveryCodeService = require('../services/encryption/recovery_codes');
 
 const speakeasy = require('speakeasy');
@@ -37,7 +37,7 @@ function setPassword(req: Request, res: Response) {
         throw new ValidationError('Password has been already set');
     }
 
-    let { password1, password2 } = req.body;
+    let {password1, password2} = req.body;
     password1 = password1.trim();
     password2 = password2.trim();
 
