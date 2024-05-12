@@ -115,9 +115,7 @@ export default class MultiFactorAuthenticationOptions extends OptionsWidget {
         });
 
         this.$protectedSessionTimeout = this.$widget.find('.protected-session-timeout-in-seconds');
-        this.$protectedSessionTimeout.on('change', () =>
-            this.updateOption('protectedSessionTimeout', this.$protectedSessionTimeout.val())
-        );
+        this.$protectedSessionTimeout.on('change', () => this.updateOption('protectedSessionTimeout', this.$protectedSessionTimeout.val()));
 
         this.displayRecoveryKeys();
     }
@@ -195,7 +193,7 @@ export default class MultiFactorAuthenticationOptions extends OptionsWidget {
             })
             .then((result) => {
                 if (result.success) {
-                    toastService.showError('Password has been changed. Trilium will be reloaded after you press OK.');
+                    toastService.showError('TOTP Secret has been set');
 
                     // password changed so current protected session is invalid and needs to be cleared
                     protectedSessionHolder.resetProtectedSession();
