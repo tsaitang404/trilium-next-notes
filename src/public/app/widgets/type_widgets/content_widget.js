@@ -1,38 +1,38 @@
-import TypeWidget from './type_widget.js';
-import ZoomFactorOptions from './options/appearance/zoom_factor.js';
-import NativeTitleBarOptions from './options/appearance/native_title_bar.js';
-import ThemeOptions from './options/appearance/theme.js';
-import FontsOptions from './options/appearance/fonts.js';
-import MaxContentWidthOptions from './options/appearance/max_content_width.js';
-import KeyboardShortcutsOptions from './options/shortcuts.js';
-import HeadingStyleOptions from './options/text_notes/heading_style.js';
-import TableOfContentsOptions from './options/text_notes/table_of_contents.js';
-import HighlightsListOptions from './options/text_notes/highlights_list.js';
-import TextAutoReadOnlySizeOptions from './options/text_notes/text_auto_read_only_size.js';
-import VimKeyBindingsOptions from './options/code_notes/vim_key_bindings.js';
-import WrapLinesOptions from './options/code_notes/wrap_lines.js';
-import CodeAutoReadOnlySizeOptions from './options/code_notes/code_auto_read_only_size.js';
-import CodeMimeTypesOptions from './options/code_notes/code_mime_types.js';
-import ImageOptions from './options/images/images.js';
-import SpellcheckOptions from './options/spellcheck.js';
-import PasswordOptions from './options/password.js';
-import EtapiOptions from './options/etapi.js';
-import BackupOptions from './options/backup.js';
-import SyncOptions from './options/sync.js';
-import SearchEngineOptions from './options/other/search_engine.js';
-import TrayOptions from './options/other/tray.js';
-import NoteErasureTimeoutOptions from './options/other/note_erasure_timeout.js';
-import RevisionsSnapshotIntervalOptions from './options/other/revisions_snapshot_interval.js';
-import NetworkConnectionsOptions from './options/other/network_connections.js';
-import AdvancedSyncOptions from './options/advanced/sync.js';
-import DatabaseIntegrityCheckOptions from './options/advanced/database_integrity_check.js';
-import ConsistencyChecksOptions from './options/advanced/consistency_checks.js';
-import VacuumDatabaseOptions from './options/advanced/vacuum_database.js';
-import DatabaseAnonymizationOptions from './options/advanced/database_anonymization.js';
-import BackendLogWidget from './content/backend_log.js';
-import AttachmentErasureTimeoutOptions from './options/other/attachment_erasure_timeout.js';
-import RibbonOptions from './options/appearance/ribbon.js';
-import MultiFactorAuthenticationOptions from './options/multi_factor_authentication.js';
+import TypeWidget from "./type_widget.js";
+import ZoomFactorOptions from "./options/appearance/zoom_factor.js";
+import NativeTitleBarOptions from "./options/appearance/native_title_bar.js";
+import ThemeOptions from "./options/appearance/theme.js";
+import FontsOptions from "./options/appearance/fonts.js";
+import MaxContentWidthOptions from "./options/appearance/max_content_width.js";
+import KeyboardShortcutsOptions from "./options/shortcuts.js";
+import HeadingStyleOptions from "./options/text_notes/heading_style.js";
+import TableOfContentsOptions from "./options/text_notes/table_of_contents.js";
+import HighlightsListOptions from "./options/text_notes/highlights_list.js";
+import TextAutoReadOnlySizeOptions from "./options/text_notes/text_auto_read_only_size.js";
+import VimKeyBindingsOptions from "./options/code_notes/vim_key_bindings.js";
+import WrapLinesOptions from "./options/code_notes/wrap_lines.js";
+import CodeAutoReadOnlySizeOptions from "./options/code_notes/code_auto_read_only_size.js";
+import CodeMimeTypesOptions from "./options/code_notes/code_mime_types.js";
+import ImageOptions from "./options/images/images.js";
+import SpellcheckOptions from "./options/spellcheck.js";
+import PasswordOptions from "./options/password.js";
+import EtapiOptions from "./options/etapi.js";
+import BackupOptions from "./options/backup.js";
+import SyncOptions from "./options/sync.js";
+import SearchEngineOptions from "./options/other/search_engine.js";
+import TrayOptions from "./options/other/tray.js";
+import NoteErasureTimeoutOptions from "./options/other/note_erasure_timeout.js";
+import RevisionsSnapshotIntervalOptions from "./options/other/revisions_snapshot_interval.js";
+import NetworkConnectionsOptions from "./options/other/network_connections.js";
+import AdvancedSyncOptions from "./options/advanced/sync.js";
+import DatabaseIntegrityCheckOptions from "./options/advanced/database_integrity_check.js";
+import ConsistencyChecksOptions from "./options/advanced/consistency_checks.js";
+import VacuumDatabaseOptions from "./options/advanced/vacuum_database.js";
+import DatabaseAnonymizationOptions from "./options/advanced/database_anonymization.js";
+import BackendLogWidget from "./content/backend_log.js";
+import AttachmentErasureTimeoutOptions from "./options/other/attachment_erasure_timeout.js";
+import RibbonOptions from "./options/appearance/ribbon.js";
+import MultiFactorAuthenticationOptions from "./options/multi_factor_authentication.js";
 
 const TPL = `<div class="note-detail-content-widget note-detail-printable">
     <style>
@@ -69,7 +69,12 @@ const CONTENT_WIDGETS = {
         HighlightsListOptions,
         TextAutoReadOnlySizeOptions
     ],
-    _optionsCodeNotes: [VimKeyBindingsOptions, WrapLinesOptions, CodeAutoReadOnlySizeOptions, CodeMimeTypesOptions],
+    _optionsCodeNotes: [
+        VimKeyBindingsOptions,
+        WrapLinesOptions,
+        CodeAutoReadOnlySizeOptions,
+        CodeMimeTypesOptions
+    ],
     _optionsMFA: [MultiFactorAuthenticationOptions],
     _optionsImages: [ImageOptions],
     _optionsSpellcheck: [SpellcheckOptions],
@@ -97,12 +102,14 @@ const CONTENT_WIDGETS = {
 
 export default class ContentWidgetTypeWidget extends TypeWidget {
     static getType() {
-        return 'contentWidget';
+        return "contentWidget";
     }
     2;
     doRender() {
         this.$widget = $(TPL);
-        this.$content = this.$widget.find('.note-detail-content-widget-content');
+        this.$content = this.$widget.find(
+            ".note-detail-content-widget-content"
+        );
 
         super.doRender();
     }
@@ -117,7 +124,7 @@ export default class ContentWidgetTypeWidget extends TypeWidget {
             for (const clazz of contentWidgets) {
                 const widget = new clazz();
 
-                await widget.handleEvent('setNoteContext', {
+                await widget.handleEvent("setNoteContext", {
                     noteContext: this.noteContext
                 });
                 this.child(widget);
