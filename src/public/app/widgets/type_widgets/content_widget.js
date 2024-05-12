@@ -32,7 +32,6 @@ import DatabaseAnonymizationOptions from "./options/advanced/database_anonymizat
 import BackendLogWidget from "./content/backend_log.js";
 import AttachmentErasureTimeoutOptions from "./options/other/attachment_erasure_timeout.js";
 import RibbonOptions from "./options/appearance/ribbon.js";
-import MultiFactorAuthenticationOptions from "./options/multi_factor_authentication.js";
 
 const TPL = `<div class="note-detail-content-widget note-detail-printable">
     <style>
@@ -62,7 +61,7 @@ const CONTENT_WIDGETS = {
         MaxContentWidthOptions,
         RibbonOptions
     ],
-    _optionsShortcuts: [KeyboardShortcutsOptions],
+    _optionsShortcuts: [ KeyboardShortcutsOptions ],
     _optionsTextNotes: [
         HeadingStyleOptions,
         TableOfContentsOptions,
@@ -75,13 +74,12 @@ const CONTENT_WIDGETS = {
         CodeAutoReadOnlySizeOptions,
         CodeMimeTypesOptions
     ],
-    _optionsMFA: [MultiFactorAuthenticationOptions],
-    _optionsImages: [ImageOptions],
-    _optionsSpellcheck: [SpellcheckOptions],
-    _optionsPassword: [PasswordOptions],
-    _optionsEtapi: [EtapiOptions],
-    _optionsBackup: [BackupOptions],
-    _optionsSync: [SyncOptions],
+    _optionsImages: [ ImageOptions ],
+    _optionsSpellcheck: [ SpellcheckOptions ],
+    _optionsPassword: [ PasswordOptions ],
+    _optionsEtapi: [ EtapiOptions ],
+    _optionsBackup: [ BackupOptions ],
+    _optionsSync: [ SyncOptions ],
     _optionsOther: [
         SearchEngineOptions,
         TrayOptions,
@@ -97,19 +95,15 @@ const CONTENT_WIDGETS = {
         AdvancedSyncOptions,
         VacuumDatabaseOptions
     ],
-    _backendLog: [BackendLogWidget]
+    _backendLog: [ BackendLogWidget ]
 };
 
 export default class ContentWidgetTypeWidget extends TypeWidget {
-    static getType() {
-        return "contentWidget";
-    }
-    2;
+    static getType() { return "contentWidget"; }
+
     doRender() {
         this.$widget = $(TPL);
-        this.$content = this.$widget.find(
-            ".note-detail-content-widget-content"
-        );
+        this.$content = this.$widget.find(".note-detail-content-widget-content");
 
         super.doRender();
     }
@@ -124,9 +118,7 @@ export default class ContentWidgetTypeWidget extends TypeWidget {
             for (const clazz of contentWidgets) {
                 const widget = new clazz();
 
-                await widget.handleEvent("setNoteContext", {
-                    noteContext: this.noteContext
-                });
+                await widget.handleEvent('setNoteContext', { noteContext: this.noteContext });
                 this.child(widget);
 
                 this.$content.append(widget.render());

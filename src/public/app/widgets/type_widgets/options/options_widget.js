@@ -10,13 +10,13 @@ export default class OptionsWidget extends NoteContextAwareWidget {
     }
 
     async updateOption(name, value) {
-        const opts = {[name]: value};
+        const opts = { [name]: value };
 
         await this.updateMultipleOptions(opts);
     }
 
     async updateMultipleOptions(opts) {
-        await server.put("options", opts);
+        await server.put('options', opts);
 
         this.showUpdateNotification();
     }
@@ -34,17 +34,17 @@ export default class OptionsWidget extends NoteContextAwareWidget {
     async updateCheckboxOption(name, $checkbox) {
         const isChecked = $checkbox.prop("checked");
 
-        return await this.updateOption(name, isChecked ? "true" : "false");
+        return await this.updateOption(name, isChecked ? 'true' : 'false');
     }
 
     setCheckboxState($checkbox, optionValue) {
-        $checkbox.prop("checked", optionValue === "true");
+        $checkbox.prop('checked', optionValue === 'true');
     }
 
     optionsLoaded(options) {}
 
     async refreshWithNote(note) {
-        const options = await server.get("options");
+        const options = await server.get('options');
 
         this.optionsLoaded(options);
     }

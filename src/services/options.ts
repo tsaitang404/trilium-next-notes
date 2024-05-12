@@ -1,5 +1,5 @@
 import becca = require('../becca/becca');
-import {OptionRow} from '../becca/entities/rows';
+import { OptionRow } from '../becca/entities/rows';
 import sql = require('./sql');
 
 function getOptionOrNull(name: string): string | null {
@@ -9,7 +9,7 @@ function getOptionOrNull(name: string): string | null {
         option = becca.getOption(name);
     } else {
         // e.g. in initial sync becca is not loaded because DB is not initialized
-        option = sql.getRow<OptionRow>('SELECT * FROM options WHERE name = ?', [name]);
+        option = sql.getRow<OptionRow>("SELECT * FROM options WHERE name = ?", [name]);
     }
 
     return option ? option.value : null;
@@ -44,7 +44,7 @@ function getOptionInt(name: string, defaultValue?: number): number {
 function getOptionBool(name: string): boolean {
     const val = getOption(name);
 
-    if (typeof val !== 'string' || !['true', 'false'].includes(val)) {
+    if (typeof val !== "string" || !['true', 'false'].includes(val)) {
         throw new Error(`Could not parse '${val}' into boolean for option '${name}'`);
     }
 
@@ -52,7 +52,7 @@ function getOptionBool(name: string): boolean {
 }
 
 function setOption(name: string, value: string | number | boolean) {
-    if (value === true || value === false || typeof value === 'number') {
+    if (value === true || value === false || typeof value === "number") {
         value = value.toString();
     }
 
@@ -62,7 +62,8 @@ function setOption(name: string, value: string | number | boolean) {
         option.value = value;
 
         option.save();
-    } else {
+    }
+    else {
         createOption(name, value, false);
     }
 }

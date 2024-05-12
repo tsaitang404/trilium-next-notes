@@ -1,10 +1,10 @@
-'use strict';
+"use strict";
 
 import optionService = require('../../services/options');
 import log = require('../../services/log');
 import searchService = require('../../services/search/services/search');
 import ValidationError = require('../../errors/validation_error');
-import {Request} from 'express';
+import { Request } from 'express';
 
 // options allowed to be updated directly in the Options dialog
 const ALLOWED_OPTIONS = new Set([
@@ -58,8 +58,7 @@ const ALLOWED_OPTIONS = new Set([
     'customSearchEngineName',
     'customSearchEngineUrl',
     'promotedAttributesOpenInRibbon',
-    'editedNotesOpenInRibbon',
-    'totpEnabled'
+    'editedNotesOpenInRibbon'
 ]);
 
 function getOptions() {
@@ -81,13 +80,12 @@ function updateOption(req: Request) {
     const {name, value} = req.params;
 
     if (!update(name, value)) {
-        throw new ValidationError('not allowed option to change');
+        throw new ValidationError("not allowed option to change");
     }
 }
 
 function updateOptions(req: Request) {
     for (const optionName in req.body) {
-        console.log(optionName);
         if (!update(optionName, req.body[optionName])) {
             // this should be improved
             // it should return 400 instead of current 500, but at least it now rollbacks transaction
@@ -111,9 +109,7 @@ function update(name: string, value: string) {
 }
 
 function getUserThemes() {
-    const notes = searchService.searchNotes('#appTheme', {
-        ignoreHoistedNote: true
-    });
+    const notes = searchService.searchNotes("#appTheme", {ignoreHoistedNote: true});
     const ret = [];
 
     for (const note of notes) {
@@ -134,12 +130,10 @@ function getUserThemes() {
 }
 
 function isAllowed(name: string) {
-    return (
-        ALLOWED_OPTIONS.has(name) ||
-        name.startsWith('keyboardShortcuts') ||
-        name.endsWith('Collapsed') ||
-        name.startsWith('hideArchivedNotes')
-    );
+    return ALLOWED_OPTIONS.has(name)
+        || name.startsWith("keyboardShortcuts")
+        || name.endsWith("Collapsed")
+        || name.startsWith("hideArchivedNotes");
 }
 
 export = {
