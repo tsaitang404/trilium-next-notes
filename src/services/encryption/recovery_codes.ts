@@ -25,9 +25,7 @@ function setRecoveryCodes(recoveryCodes: string) {
 }
 function getRecoveryCodes() {
     if (!isRecoveryCodeSet()) {
-        throw new Error(
-            "Recovery codes have not been set yet, so it cannot be changed. Use 'setRecoveryCodes' instead."
-        );
+        return Array(8).fill("Keys not set")
     }
 
     return sql.transactional(() => {
@@ -69,6 +67,10 @@ function verifyRecoveryCode(recoveryCodeGuess: string) {
 }
 
 function getUsedRecoveryCodes() {
+    if (!isRecoveryCodeSet()){
+        return Array(8).fill("Recovery code not set")
+    }
+
     const dateRegex = RegExp(/^\d{4}\/\d{2}\/\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/gm);
     const recoveryCodes = getRecoveryCodes();
     const usedStatus: string[] = [];

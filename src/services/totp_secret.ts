@@ -18,6 +18,7 @@ function getTotpSecret() {
 }
 
 function checkForTotSecret() {
+    console.log("Check" + fs.existsSync(totpSecretPath));
     return fs.existsSync(totpSecretPath);
 }
 

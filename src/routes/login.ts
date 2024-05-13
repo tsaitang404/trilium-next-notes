@@ -16,7 +16,7 @@ import recoveryCodeService = require('../services/encryption/recovery_codes');
 const speakeasy = require('speakeasy');
 
 function loginPage(req: Request, res: Response) {
-    res.render('login', {
+    res.render("login", {
         failedAuth: false,
         totpEnabled: optionService.getOption('totpEnabled') && totp_secret.checkForTotSecret(),
         assetPath: assetPath,

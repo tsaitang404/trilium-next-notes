@@ -29,11 +29,12 @@ function disableTOTP() {
 function setTotpSecret(req: Request) {
     if (!passwordEncryptionService.verifyPassword(req.body.password)) throw new ValidationError('Incorrect password reset confirmation');
 
-    const regex = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
-    if (req.body.secret.length != 52) return;
-    if (regex.test(req.body.secret)) return;
+    const newSecret = req.body.secret.trim()
+    const regex = RegExp(/^[a-zA-Z0-9]{52}$/gm);
+    
+    if (!regex.test(newSecret)) return;
 
-    totp_fs.saveTotpSecret(req.body.secret);
+    totp_fs.saveTotpSecret(newSecret);
 }
 
 function getSecret() {

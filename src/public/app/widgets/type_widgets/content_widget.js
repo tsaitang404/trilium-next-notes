@@ -32,6 +32,7 @@ import DatabaseAnonymizationOptions from "./options/advanced/database_anonymizat
 import BackendLogWidget from "./content/backend_log.js";
 import AttachmentErasureTimeoutOptions from "./options/other/attachment_erasure_timeout.js";
 import RibbonOptions from "./options/appearance/ribbon.js";
+import MultiFactorAuthenticationOptions from "./options/multi_factor_authentication.js";
 
 const TPL = `<div class="note-detail-content-widget note-detail-printable">
     <style>
@@ -61,25 +62,22 @@ const CONTENT_WIDGETS = {
         MaxContentWidthOptions,
         RibbonOptions
     ],
-    _optionsShortcuts: [ KeyboardShortcutsOptions ],
+    _optionsShortcuts: [KeyboardShortcutsOptions],
     _optionsTextNotes: [
         HeadingStyleOptions,
         TableOfContentsOptions,
         HighlightsListOptions,
         TextAutoReadOnlySizeOptions
     ],
-    _optionsCodeNotes: [
-        VimKeyBindingsOptions,
-        WrapLinesOptions,
-        CodeAutoReadOnlySizeOptions,
-        CodeMimeTypesOptions
-    ],
-    _optionsImages: [ ImageOptions ],
-    _optionsSpellcheck: [ SpellcheckOptions ],
-    _optionsPassword: [ PasswordOptions ],
-    _optionsEtapi: [ EtapiOptions ],
-    _optionsBackup: [ BackupOptions ],
-    _optionsSync: [ SyncOptions ],
+    _optionsCodeNotes: [VimKeyBindingsOptions, WrapLinesOptions, CodeAutoReadOnlySizeOptions, CodeMimeTypesOptions],
+    _optionsImages: [ImageOptions],
+    _optionsMFA: [MultiFactorAuthenticationOptions],
+    _optionsImages: [ImageOptions],
+    _optionsSpellcheck: [SpellcheckOptions],
+    _optionsPassword: [PasswordOptions],
+    _optionsEtapi: [EtapiOptions],
+    _optionsBackup: [BackupOptions],
+    _optionsSync: [SyncOptions],
     _optionsOther: [
         SearchEngineOptions,
         TrayOptions,
@@ -95,7 +93,7 @@ const CONTENT_WIDGETS = {
         AdvancedSyncOptions,
         VacuumDatabaseOptions
     ],
-    _backendLog: [ BackendLogWidget ]
+    _backendLog: [BackendLogWidget]
 };
 
 export default class ContentWidgetTypeWidget extends TypeWidget {
