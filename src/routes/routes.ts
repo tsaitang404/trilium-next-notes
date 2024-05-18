@@ -23,7 +23,7 @@ import setupRoute = require('./setup');
 import loginRoute = require('./login');
 import indexRoute = require('./index');
 import callbackRoute = require('./callback');
-import oidc = require('../services/login/open_id_connect');
+import oidc = require('../services/login/oidc_testing');
 
 // API routes
 import treeApiRoute = require('./api/tree');
@@ -79,8 +79,6 @@ import etapiBackupRoute = require('../etapi/backup');
 import {AppRequest, AppRequestHandler} from './route-interface';
 import callback = require('./callback');
 
-// import { requiresAuth } = require('express-openid-connect');
-const {requiresAuth} = require('express-openid-connect');
 
 const csrfMiddleware = csurf({
     cookie: {
@@ -124,7 +122,8 @@ function register(app: express.Application) {
     route(GET, '/', [auth.checkAuth, csrfMiddleware], indexRoute.index);
     route(GET, '/login', [auth.checkAppInitialized, auth.checkPasswordSet], loginRoute.loginPage);
     route(GET, '/set-password', [auth.checkAppInitialized, auth.checkPasswordNotSet], loginRoute.setPasswordPage);
-    route(GET, '/auth', [oidc.preAuth], oidc.authenticate);
+    route(GET, '/info', [], oidc.explain)
+
 
     const loginRateLimiter = rateLimit.rateLimit({
         windowMs: 15 * 60 * 1000, // 15 minutes
@@ -136,9 +135,7 @@ function register(app: express.Application) {
     route(PST, '/logout', [csrfMiddleware, auth.checkAuth], loginRoute.logout);
     route(PST, '/set-password', [auth.checkAppInitialized, auth.checkPasswordNotSet], loginRoute.setPassword);
     route(GET, '/setup', [], setupRoute.setupPage);
-    // route(PST, '/authenticate', [], oidc.authenticate);
 
-    route(GET, '/callback', [], callback.callback);
 
     apiRoute(GET, '/api/totp/generate', totp.generateSecret);
     apiRoute(GET, '/api/totp/enabled', totp.checkForTOTP);
@@ -152,8 +149,6 @@ function register(app: express.Application) {
     apiRoute(GET, '/api/totp_recovery/generate', recoveryCodes.generateRecoveryCodes);
     apiRoute(GET, '/api/totp_recovery/enabled', recoveryCodes.checkForRecoveryKeys);
     apiRoute(GET, '/api/totp_recovery/used', recoveryCodes.getUsedRecoveryCodes);
-
-    apiRoute(GET, '/api/oidc/initiate', oidc.login);
 
     apiRoute(GET, '/api/tree', treeApiRoute.getTree);
     apiRoute(PST, '/api/tree/load', treeApiRoute.load);

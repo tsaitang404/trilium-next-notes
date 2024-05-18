@@ -8,14 +8,32 @@ import helmet = require('helmet');
 import compression = require('compression');
 import sessionParser = require('./routes/session_parser');
 import utils = require('./services/utils');
-import {config} from 'process';
-
-const {auth, requiresAuth} = require('express-openid-connect');
+import process = require('process');
+import oidc = require('express-openid-connect')
 
 require('./services/handlers');
 require('./becca/becca_loader');
+require("dotenv").config()
 
 const app = express();
+
+const authRoutes = {
+    callback: '/callback',
+    login: '/auth',
+    postLogoutRedirect: '/login',
+    logout: '/logout'
+};
+
+const authConfig = {
+    authRequired: true,
+    auth0Logout: true,
+    baseURL: process.env.BASE_URL,
+    clientID: process.env.CLIENT_ID,
+    issuerBaseURL: process.env.ISSUER_BASE_URL,
+    secret: process.env.SECRET,
+    routes: authRoutes,
+};
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -44,6 +62,9 @@ app.use(`/robots.txt`, express.static(path.join(__dirname, 'public/robots.txt'))
 app.use(sessionParser);
 app.use(favicon(`${__dirname}/../images/app-icons/win/icon.ico`));
 
+if ( process.env.ENABLE_OAUTH?.toLocaleLowerCase() === "true")
+    app.use(oidc.auth(authConfig));
+
 require('./routes/assets').register(app);
 require('./routes/routes').register(app);
 require('./routes/custom').register(app);
@@ -59,28 +80,6 @@ require('./services/backup');
 require('./services/consistency_checks');
 
 require('./services/scheduler');
-
-const authRoutes = {
-    callback: '/callback',
-    login: '/auth',
-    postLogoutRedirect: '/login',
-};
-
-const authConfig = {
-    authRequired: true,
-    auth0Logout: true,
-    ***REMOVED***
-***REMOVED***
-***REMOVED***
-***REMOVED***
-    routes: authRoutes,
-};
-
-app.use(auth(authConfig));
-
-// app.get('/auth', requiresAuth(), (req, res) => {
-//     res.send(JSON.stringify(req, null, 2));
-// });
 
 if (utils.isElectron()) {
     require('@electron/remote/main').initialize();
