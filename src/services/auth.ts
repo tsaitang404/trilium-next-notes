@@ -9,14 +9,19 @@ import config = require('./config');
 import passwordService = require('./encryption/password');
 import type { NextFunction, Request, Response } from 'express';
 import { AppRequest } from '../routes/route-interface';
+import openID = require('./open_id');
 
 const noAuthentication = config.General && config.General.noAuthentication === true;
 
 function checkAuth(req: AppRequest, res: Response, next: NextFunction) {
     if (!sqlInit.isDbInitialized()) {
         res.redirect("setup");
+    // TODO: Find out how to set session logged in
+    }else if ( !req.oidc.isAuthenticated() && openID.isOpenIDEnabled()){
+        // !req.session.loggedIn
+        res.redirect("auth")
     }
-    else if (!req.session.loggedIn && !utils.isElectron() && !noAuthentication) {
+    else if (!req.session.loggedIn && !utils.isElectron() && !noAuthentication && !openID.isOpenIDEnabled()) {
         res.redirect("login");
     }
     else {

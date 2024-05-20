@@ -9,11 +9,17 @@ import compression = require('compression');
 import sessionParser = require('./routes/session_parser');
 import utils = require('./services/utils');
 import process = require('process');
-import oidc = require('express-openid-connect')
+import oidc = require('express-openid-connect');
+import openID = require('./services/open_id');
+import {Request, Response, NextFunction} from 'express';
+import {userInfo} from 'os';
+import {request} from 'http';
+import a = require('./services/login/oidc_testing');
+import oidc_testing = require('./services/login/oidc_testing');
 
 require('./services/handlers');
 require('./becca/becca_loader');
-require("dotenv").config()
+require('dotenv').config();
 
 const app = express();
 
@@ -21,19 +27,25 @@ const authRoutes = {
     callback: '/callback',
     login: '/auth',
     postLogoutRedirect: '/login',
-    logout: '/logout'
+    logout: '/logout',
+};
+
+const logoutParams = {
+    end_session_endpoint: '/end-session/',
 };
 
 const authConfig = {
     authRequired: true,
-    auth0Logout: true,
+    auth0Logout: false,
     baseURL: process.env.BASE_URL,
     clientID: process.env.CLIENT_ID,
     issuerBaseURL: process.env.ISSUER_BASE_URL,
     secret: process.env.SECRET,
+    // scope: 'code',
     routes: authRoutes,
+    idpLogout: true,
+    logoutParams: logoutParams,
 };
-
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -62,8 +74,10 @@ app.use(`/robots.txt`, express.static(path.join(__dirname, 'public/robots.txt'))
 app.use(sessionParser);
 app.use(favicon(`${__dirname}/../images/app-icons/win/icon.ico`));
 
-if ( process.env.ENABLE_OAUTH?.toLocaleLowerCase() === "true")
-    app.use(oidc.auth(authConfig));
+if (openID.checkOpenIDRequirements()) app.use(oidc.auth(authConfig));
+
+app.get('/info', a.explain);
+app.get('/callback', oidc_testing.callback);
 
 require('./routes/assets').register(app);
 require('./routes/routes').register(app);

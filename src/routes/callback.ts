@@ -7,8 +7,9 @@ import {Request, Response} from 'express';
 function callback(req: Request, res: Response) {
     console.log('GOT CALLBACK');
     console.log(req.body);
+    res.redirect("/")
 }
 
 export = {
-    callback,
+    // callback,
 };

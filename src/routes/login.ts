@@ -1,3 +1,5 @@
+/** @format */
+
 'use strict';
 
 import utils = require('../services/utils');
@@ -12,15 +14,31 @@ import totp_secret = require('../services/totp_secret');
 import {Request, Response} from 'express';
 import {AppRequest} from './route-interface';
 import recoveryCodeService = require('../services/encryption/recovery_codes');
+import openID = require('../services/open_id');
 
 const speakeasy = require('speakeasy');
 
 function loginPage(req: Request, res: Response) {
-    res.render("login", {
+    // console.log( req.oidc.isAuthenticated())
+    if (openID.isOpenIDEnabled()) res.redirect('/auth');
+    else
+        res.render('login', {
+            failedAuth: false,
+            totpEnabled: optionService.getOption('totpEnabled') && totp_secret.checkForTotSecret(),
+            openIDEnabled: openID.isOpenIDEnabled(),
+            assetPath: assetPath,
+            appPath: appPath,
+        });
+}
+
+function authFailedPage(req: Request, res: Response) {
+    // console.log( req.oidc.isAuthenticated())
+    res.render('auth-failed', {
         failedAuth: false,
         totpEnabled: optionService.getOption('totpEnabled') && totp_secret.checkForTotSecret(),
+        openIDEnabled: openID.isOpenIDEnabled(),
         assetPath: assetPath,
-        appPath: appPath
+        appPath: appPath,
     });
 }
 
@@ -28,7 +46,7 @@ function setPasswordPage(req: Request, res: Response) {
     res.render('set_password', {
         error: false,
         assetPath: assetPath,
-        appPath: appPath
+        appPath: appPath,
     });
 }
 
@@ -52,7 +70,7 @@ function setPassword(req: Request, res: Response) {
     if (error) {
         res.render('set_password', {
             error,
-            assetPath: assetPath
+            assetPath: assetPath,
         });
         return;
     }
@@ -98,7 +116,7 @@ function sendLoginError(req: AppRequest, res: Response) {
     res.status(401).render('login', {
         failedAuth: true,
         totpEnabled: optionService.getOption('totpEnabled') && totp_secret.checkForTotSecret(),
-        assetPath: assetPath
+        assetPath: assetPath,
     });
 }
 
@@ -107,7 +125,7 @@ function verifyTOTP(guessedToken: string) {
         secret: totp_secret.getTotpSecret(),
         encoding: 'base32',
         token: guessedToken,
-        window: 1
+        window: 1,
     });
 
     if (tokenValidates) return true;
@@ -129,7 +147,8 @@ function logout(req: AppRequest, res: Response) {
     req.session.regenerate(() => {
         req.session.loggedIn = false;
 
-        res.redirect('login');
+        if (openID.isOpenIDEnabled()) res.oidc.logout({});
+        else res.redirect('login');
     });
 }
 
@@ -138,5 +157,6 @@ export = {
     setPasswordPage,
     setPassword,
     login,
-    logout
+    logout,
+    authFailedPage,
 };
