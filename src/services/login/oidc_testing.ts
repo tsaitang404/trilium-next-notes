@@ -10,31 +10,21 @@ import open_id = require('../open_id');
 import options = require('../options');
 
 async function pass() {
-    await openIDService.setSubjectIdentifier('req.oidc.user?.sub');
+    // await openIDService.setSubjectIdentifier('req.oidc.user?.sub');
 }
 
 function authCallback(req: AppRequest, res: Response, next: NextFunction) {
     console.log('CALLBACK');
 
-    // if (!openIDService.isSubjectIdentifierSet()) {
-    req.session.loggedIn = true;
-    // req.app.locals.firstLogin = true;
+    console.log('Checking to see if [' + req.oidc.user?.name + '] is logged in');
+    if (!req.app.locals.userSubjectIdentifierSaved) {
+        req.session.loggedIn = true;
+        console.log('USER IS NOT SET! NEED TO SET!');
+    } else {
+        if (req.app.locals.userAuthenticated) req.session.loggedIn = true;
+        else req.session.loggedIn = false;
+    }
     next();
-    // } else {
-    //     console.log('Verifying user: ' + openIDEncryptionService.verifyOpenIDSubjectIdentifier(req.oidc.user?.sub));
-    //     next();
-    // }
-
-    // next();
-
-    // req.oidc.fetchUserInfo().then((result) => {
-    //     if (openIDEncryptionService.verifyOpenIDSubjectIdentifier(result.sub)) {
-    //         req.session.loggedIn = true;
-    //         next();
-    //     }
-    // });
-
-    // res.redirect('/auth-failed');
 }
 
 function callback(req: Request, res: Response, next: NextFunction) {
@@ -51,7 +41,8 @@ function explain(req: Request, res: Response, next: NextFunction) {
             req.oidc.fetchUserInfo().then((result) => {
                 console.log(result.sub);
             });
-            res.send(req.oidc.user?.name);
+            // res.send(req.oidc.user?.name);
+            return {success: true, data: req.oidc.user};
         } else res.send('User is not logged in');
     } else res.send('OIDC Not enabled');
 }
@@ -64,10 +55,32 @@ function postAuth(req: Request, res: Response, next: NextFunction) {
     // req.session.
 }
 
+function verifySubId(req: Request, res: Response, next: NextFunction) {
+    req.oidc.fetchUserInfo().then((result) => {
+        return {success: true, result: openIDEncryptionService.verifyOpenIDSubjectIdentifier(result.sub)};
+    });
+}
+
+function check(req: Request, res: Response, next: NextFunction) {
+    return {success: true, message: openIDService.isSubjectIdentifierSet()};
+}
+
+function login(req: Request, res: Response, next: NextFunction) {
+    if (openIDService.isSubjectIdentifierSaved()) return {success: false, message: 'User ID already saved!'};
+    if (!req.oidc.user) return {success: false, message: 'User not logged in!'};
+
+    openIDService.createSubjectIdentifier(options, req.oidc.user?.sub);
+    console.log('User Sub saved!');
+    return {success: true, message: 'User ' + req.oidc.user.sub + ' saved!'};
+}
+
 export = {
     explain,
     authCallback,
     postAuth,
     callback,
     logoutOfOidc,
+    verifySubId,
+    login,
+    check,
 };

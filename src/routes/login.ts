@@ -20,7 +20,7 @@ const speakeasy = require('speakeasy');
 
 function loginPage(req: Request, res: Response) {
     // console.log( req.oidc.isAuthenticated())
-    if (openID.isOpenIDEnabled()) res.redirect('/auth');
+    if (openID.isOpenIDEnabled() && req.app.locals.userSubjectIdentifierSaved) res.redirect('/auth');
     else
         res.render('login', {
             failedAuth: false,

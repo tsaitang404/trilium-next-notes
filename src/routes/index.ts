@@ -19,17 +19,17 @@ import openIDService = require('../services/encryption/open_id');
 function index(req: Request, res: Response) {
     const options = optionService.getOptionMap();
 
-    if (req.app.locals.firstLogin === true) {
-        openIDService.setSubjectIdentifier(req.oidc.user?.sub);
-        // console.log(req.oidc.user?.sub);
-        // pass();
+    // if (req.app.locals.firstLogin === true) {
+    //     openIDService.cre(req.oidc.user?.sub);
+    // console.log(req.oidc.user?.sub);
+    // pass();
 
-        // req.oidc.fetchUserInfo().then((result) => {
-        //     console.log('Set User Subject-Identifier');
-        //     openIDService.setSubjectIdentifier(result.sub);
-        // });
-        // next();
-    }
+    // req.oidc.fetchUserInfo().then((result) => {
+    //     console.log('Set User Subject-Identifier');
+    //     openIDService.setSubjectIdentifier(result.sub);
+    // });
+    // next();
+    // }
 
     const view = !utils.isElectron() && req.cookies['trilium-device'] === 'mobile' ? 'mobile' : 'desktop';
 

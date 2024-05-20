@@ -45,19 +45,20 @@ function isSubjectIdentifierSet() {
 //     };
 // }
 
-function setSubjectIdentifier(subjectIdentifier: string) {
+function createSubjectIdentifier(options: any, subjectIdentifier: string) {
     if (isSubjectIdentifierSet()) {
         throw new Error(
             "SubjectIdentifier is set already. Either change it or perform 'reset Subject Identifier' first."
         );
     }
-    optionService.setOption('subjectIdentifierVerificationSalt', utils.randomSecureToken(32));
-    optionService.setOption('subjectIdentifierDerivedKeySalt', utils.randomSecureToken(32));
+    console.log('FDFFF');
+    options.createOption('subjectIdentifierVerificationSalt', utils.randomSecureToken(32), true);
+    options.createOption('subjectIdentifierDerivedKeySalt', utils.randomSecureToken(32), true);
     const subjectIdentifierVerificationKey = utils.toBase64(myScryptService.getVerificationHash(subjectIdentifier));
-    optionService.setOption('subjectIdentifierVerificationHash', subjectIdentifierVerificationKey);
+    options.createOption('subjectIdentifierVerificationHash', subjectIdentifierVerificationKey, true);
 
     // passwordEncryptionService expects these options to already exist
-    optionService.setOption('subjectIdentifierEncryptedDataKey', '');
+    options.createOption('subjectIdentifierEncryptedDataKey', '', true);
     openIDEncryptionService.setDataKey(subjectIdentifier, utils.randomSecureToken(16));
     return {
         success: true,
@@ -78,9 +79,14 @@ function resetSubjectIdentifier() {
     };
 }
 
+function isSubjectIdentifierSaved() {
+    return optionService.getOptionBool('userSubjectIdentifierSaved');
+}
+
 export = {
     isSubjectIdentifierSet,
     // changeSubjectIdentifier,
-    setSubjectIdentifier,
+    createSubjectIdentifier,
     resetSubjectIdentifier,
+    isSubjectIdentifierSaved,
 };

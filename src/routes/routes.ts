@@ -80,6 +80,8 @@ import {AppRequest, AppRequestHandler} from './route-interface';
 import callback = require('./callback');
 import {LogoutOptions} from 'express-openid-connect';
 
+import openIDService = require('../services/open_id');
+
 const csrfMiddleware = csurf({
     cookie: {
         path: '', // empty, so cookie is valid only for the current path
@@ -147,6 +149,10 @@ function register(app: express.Application) {
     apiRoute(PST, '/api/totp/disable', totp.disableTOTP);
     apiRoute(PST, '/api/totp/set', totp.setTotpSecret);
     apiRoute(GET, '/api/totp/get', totp.getSecret);
+    apiRoute(GET, '/api/oidc/info', oidc.explain);
+    apiRoute(GET, '/api/oidc/verify', oidc.verifySubId);
+    apiRoute(GET, '/api/oidc/login', oidc.login);
+    apiRoute(GET, '/api/oidc/check', oidc.check);
 
     apiRoute(PST, '/api/totp_recovery/set', recoveryCodes.setRecoveryCodes);
     apiRoute(PST, '/api/totp_recovery/verify', recoveryCodes.veryifyRecoveryCode);
