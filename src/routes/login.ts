@@ -14,18 +14,18 @@ import totp_secret = require('../services/totp_secret');
 import {Request, Response} from 'express';
 import {AppRequest} from './route-interface';
 import recoveryCodeService = require('../services/encryption/recovery_codes');
-import openID = require('../services/open_id');
+import openIDService = require('../services/open_id');
+import openID = require('../services/encryption/open_id');
 
 const speakeasy = require('speakeasy');
 
 function loginPage(req: Request, res: Response) {
-    // console.log( req.oidc.isAuthenticated())
-    if (openID.isOpenIDEnabled() && req.app.locals.userSubjectIdentifierSaved) res.redirect('/auth');
+    if (openIDService.isOpenIDEnabled() && req.app.locals.userSubjectIdentifierSaved) res.redirect('/auth');
     else
         res.render('login', {
             failedAuth: false,
             totpEnabled: optionService.getOption('totpEnabled') && totp_secret.checkForTotSecret(),
-            openIDEnabled: openID.isOpenIDEnabled(),
+            openIDEnabled: openIDService.isOpenIDEnabled(),
             assetPath: assetPath,
             appPath: appPath,
         });
@@ -36,7 +36,7 @@ function authFailedPage(req: Request, res: Response) {
     res.render('auth-failed', {
         failedAuth: false,
         totpEnabled: optionService.getOption('totpEnabled') && totp_secret.checkForTotSecret(),
-        openIDEnabled: openID.isOpenIDEnabled(),
+        openIDEnabled: openIDService.isOpenIDEnabled(),
         assetPath: assetPath,
         appPath: appPath,
     });
@@ -147,7 +147,7 @@ function logout(req: AppRequest, res: Response) {
     req.session.regenerate(() => {
         req.session.loggedIn = false;
 
-        if (openID.isOpenIDEnabled()) res.oidc.logout({});
+        if (openIDService.isOpenIDEnabled() && openID.isSubjectIdentifierSaved()) res.oidc.logout({});
         else res.redirect('login');
     });
 }

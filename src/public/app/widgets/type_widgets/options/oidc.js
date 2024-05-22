@@ -19,7 +19,6 @@ const TPL = `
         <button class="loginButton" > Launch OIDC </button>
     </div>
 
-
     <div>
         <h4>Data</h4>
         <span class="info-dump"><i>No data loaded</i></span>
@@ -28,7 +27,7 @@ const TPL = `
     </div>
 
     <div>
-        <h4>Current User</h4>
+        <h4>Validate Current User</h4>
         <span class="current-user-dump"><i>No data loaded</i></span>
         <br>
         <button class="currentUserButton" > Launch OIDC </button>
@@ -58,7 +57,7 @@ export default class OpenIDOptions extends OptionsWidget {
 
         this.$currentUserButton.on('click', (async) => {
             server.get('oidc/verify').then((result) => {
-                this.$currentUserText.text(JSON.stringify(result));
+                this.$currentUserText.text(result.message);
             });
         });
 

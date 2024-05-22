@@ -4,20 +4,19 @@ import optionService = require('../options');
 import myScryptService = require('./my_scrypt');
 import utils = require('../utils');
 import dataEncryptionService = require('./data_encryption');
-import open_id = require('./open_id');
 
-function verifyOpenIDSubjectIdentifier(password: string) {
-    if (!optionService.getOptionBool('userSubjectIdentifierSaved')) return false;
+function verifyOpenIDSubjectIdentifier(subjectIdentifier: string) {
+    if (!optionService.getOptionBool('userSubjectIdentifierSaved')) {
+        return false;
+    }
 
-    const givenSubjectIdentifierHash = utils.toBase64(myScryptService.getSubjectIdentifierVerificationHash(password));
+    const givenSubjectIdentifierHash = utils.toBase64(
+        myScryptService.getSubjectIdentifierVerificationHash(subjectIdentifier)
+    );
 
     const dbSubjectIdentifierHash = optionService.getOptionOrNull('subjectIdentifierVerificationHash');
 
-    if (!dbSubjectIdentifierHash) {
-        return false;
-    }
-    console.log('HERE');
-    console.log(givenSubjectIdentifierHash === dbSubjectIdentifierHash);
+    if (!dbSubjectIdentifierHash) return false;
 
     return givenSubjectIdentifierHash === dbSubjectIdentifierHash;
 }

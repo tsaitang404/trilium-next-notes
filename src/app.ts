@@ -77,7 +77,6 @@ app.use(favicon(`${__dirname}/../images/app-icons/win/icon.ico`));
 if (openID.checkOpenIDRequirements()) app.use(oidc.auth(authConfig));
 
 app.get('/info', a.explain);
-app.get('/callback', oidc_testing.callback);
 
 require('./routes/assets').register(app);
 require('./routes/routes').register(app);

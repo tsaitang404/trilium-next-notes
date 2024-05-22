@@ -121,13 +121,13 @@ const uploadMiddlewareWithErrorHandling = function (
 };
 
 function register(app: express.Application) {
-    route(GET, '/', [auth.checkAuth, oidc.authCallback, csrfMiddleware], indexRoute.index);
+    route(GET, '/', [auth.checkAuth, oidc.openIDCheck, csrfMiddleware], indexRoute.index);
     route(GET, '/login', [auth.checkAppInitialized, auth.checkPasswordSet], loginRoute.loginPage);
     route(GET, '/set-password', [auth.checkAppInitialized, auth.checkPasswordNotSet], loginRoute.setPasswordPage);
     route(GET, '/auth-failed', [], loginRoute.authFailedPage);
     // route(GET, '/info', [], oidc.explain)
     // route(GET, '/callback', [oidc.authCallback], oidc.callback)
-    route(GET, '/logot', [], oidc.logoutOfOidc);
+    // route(GET, '/logot', [], oidc.logoutOfOidc);
 
     const loginRateLimiter = rateLimit.rateLimit({
         windowMs: 15 * 60 * 1000, // 15 minutes
@@ -139,9 +139,6 @@ function register(app: express.Application) {
     route(PST, '/logout', [csrfMiddleware, auth.checkAuth], loginRoute.logout);
     route(PST, '/set-password', [auth.checkAppInitialized, auth.checkPasswordNotSet], loginRoute.setPassword);
     route(GET, '/setup', [], setupRoute.setupPage);
-
-    apiRoute(GET, '/callback', oidc.callback);
-    apiRoute(PST, '/callback', oidc.callback);
 
     apiRoute(GET, '/api/totp/generate', totp.generateSecret);
     apiRoute(GET, '/api/totp/enabled', totp.checkForTOTP);

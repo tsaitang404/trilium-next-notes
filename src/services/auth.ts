@@ -12,20 +12,23 @@ import passwordService = require('./encryption/password');
 import type {NextFunction, Request, Response} from 'express';
 import {AppRequest} from '../routes/route-interface';
 import openID = require('./open_id');
+import openIdService = require('../services/encryption/open_id');
 
 const noAuthentication = config.General && config.General.noAuthentication === true;
 
 function checkAuth(req: AppRequest, res: Response, next: NextFunction) {
     if (!sqlInit.isDbInitialized()) {
-        req.app.locals.userSubjectIdentifierSaved = false;
         res.redirect('setup');
-        // TODO: Find out how to set session logged in
-    } else if (!req.session.loggedIn && openID.isOpenIDEnabled()) {
-        if (req.app.locals.userSubjectIdentifierSaved) res.redirect('auth');
-    } else if (!req.session.loggedIn && !utils.isElectron() && !noAuthentication && !openID.isOpenIDEnabled()) {
+    } else if (
+        !req.session.loggedIn &&
+        openID.isOpenIDEnabled() &&
+        openIdService.isSubjectIdentifierSaved() &&
+        !noAuthentication
+    ) {
+        res.redirect('auth');
+    } else if (!req.session.loggedIn && !utils.isElectron() && !noAuthentication) {
         res.redirect('login');
-    }
-    next();
+    } else next();
 }
 
 // for electron things which need network stuff
