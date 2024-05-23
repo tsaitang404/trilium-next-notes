@@ -13,6 +13,7 @@ import type {NextFunction, Request, Response} from 'express';
 import {AppRequest} from '../routes/route-interface';
 import openID = require('./open_id');
 import openIdService = require('../services/encryption/open_id');
+import openIDEncryptionService = require('../services/encryption/open_id_encryption');
 
 const noAuthentication = config.General && config.General.noAuthentication === true;
 
@@ -25,7 +26,15 @@ function checkAuth(req: AppRequest, res: Response, next: NextFunction) {
         openIdService.isSubjectIdentifierSaved() &&
         !noAuthentication
     ) {
-        res.redirect('auth');
+        const result = req.oidc.fetchUserInfo().then((result) => {
+            if (openIDEncryptionService.verifyOpenIDSubjectIdentifier(result.sub)) {
+                req.session.loggedIn = true;
+                next();
+            } else {
+                req.session.loggedIn = false;
+                res.oidc.logout({});
+            }
+        });
     } else if (!req.session.loggedIn && !utils.isElectron() && !noAuthentication) {
         res.redirect('login');
     } else next();

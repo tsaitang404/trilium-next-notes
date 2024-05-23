@@ -121,7 +121,7 @@ const uploadMiddlewareWithErrorHandling = function (
 };
 
 function register(app: express.Application) {
-    route(GET, '/', [auth.checkAuth, oidc.openIDCheck, csrfMiddleware], indexRoute.index);
+    route(GET, '/', [auth.checkAuth, csrfMiddleware], indexRoute.index);
     route(GET, '/login', [auth.checkAppInitialized, auth.checkPasswordSet], loginRoute.loginPage);
     route(GET, '/set-password', [auth.checkAppInitialized, auth.checkPasswordNotSet], loginRoute.setPasswordPage);
     route(GET, '/auth-failed', [], loginRoute.authFailedPage);
