@@ -1,3 +1,5 @@
+/** @format */
+
 import options = require('../../services/options');
 import totp_secret = require('../../services/encryption/totp_secret');
 import passwordEncryptionService = require('../../services/encryption/password_encryption');
@@ -10,13 +12,14 @@ function generateSecret() {
     return {success: 'true', message: speakeasy.generateSecret().base32};
 }
 
-function checkForTOTP() {
+function getTOTPStatus() {
     const totpEnabled = options.getOptionBool('totpEnabled');
     return {success: 'true', message: totpEnabled};
 }
 
 function enableTOTP() {
     options.setOption('totpEnabled', true);
+    options.setOption('oAuthEnabled', false);
     return {success: 'true'};
 }
 
@@ -27,11 +30,12 @@ function disableTOTP() {
 }
 
 function setTotpSecret(req: Request) {
-    if (!passwordEncryptionService.verifyPassword(req.body.password)) throw new ValidationError('Incorrect password reset confirmation');
+    if (!passwordEncryptionService.verifyPassword(req.body.password))
+        throw new ValidationError('Incorrect password reset confirmation');
 
-    const newSecret = req.body.secret.trim()
+    const newSecret = req.body.secret.trim();
     const regex = RegExp(/^[a-zA-Z0-9]{52}$/gm);
-    
+
     if (!regex.test(newSecret)) return;
 
     totp_fs.saveTotpSecret(newSecret);
@@ -43,9 +47,9 @@ function getSecret() {
 
 export = {
     generateSecret,
-    checkForTOTP,
+    getTOTPStatus,
     enableTOTP,
     disableTOTP,
     setTotpSecret,
-    getSecret
+    getSecret,
 };

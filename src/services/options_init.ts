@@ -110,6 +110,7 @@ const defaultOptions = [
     {name: 'totpEnabled', value: 'false', isSynced: true},
     {name: 'encryptedRecoveryCodes', value: 'false', isSynced: true},
     {name: 'userSubjectIdentifierSaved', value: 'false', isSynced: true},
+    {name: 'oAuthEnabled', value: 'false', isSynced: true},
 ];
 
 function initStartupOptions() {

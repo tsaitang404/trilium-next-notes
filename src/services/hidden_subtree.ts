@@ -343,7 +343,6 @@ const HIDDEN_SUBTREE_DEFINITION: Item = {
                 {id: '_optionsShortcuts', title: 'Shortcuts', type: 'contentWidget', icon: 'bxs-keyboard'},
                 {id: '_optionsTextNotes', title: 'Text Notes', type: 'contentWidget', icon: 'bx-text'},
                 {id: '_optionsMFA', title: 'MFA', type: 'contentWidget', icon: 'bx-lock'},
-                {id: '_optionsOpenID', title: 'OpenID', type: 'contentWidget', icon: 'bx-lock'},
                 {id: '_optionsCodeNotes', title: 'Code Notes', type: 'contentWidget', icon: 'bx-code'},
                 {id: '_optionsImages', title: 'Images', type: 'contentWidget', icon: 'bx-image'},
                 {id: '_optionsSpellcheck', title: 'Spellcheck', type: 'contentWidget', icon: 'bx-check-double'},

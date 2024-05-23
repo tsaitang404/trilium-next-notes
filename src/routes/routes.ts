@@ -132,13 +132,17 @@ function register(app: express.Application) {
     route(GET, '/setup', [], setupRoute.setupPage);
 
     apiRoute(GET, '/api/totp/generate', totp.generateSecret);
-    apiRoute(GET, '/api/totp/enabled', totp.checkForTOTP);
+    apiRoute(GET, '/api/totp/status', totp.getTOTPStatus);
     apiRoute(PST, '/api/totp/enable', totp.enableTOTP);
     apiRoute(PST, '/api/totp/disable', totp.disableTOTP);
     apiRoute(PST, '/api/totp/set', totp.setTotpSecret);
     apiRoute(GET, '/api/totp/get', totp.getSecret);
+
+    apiRoute(GET, '/api/oauth/status', oidc.getOAuthStatus);
+    apiRoute(PST, '/api/oauth/enable', oidc.enableOAuth);
+    apiRoute(PST, '/api/oauth/disable', oidc.disableOAuth);
     apiRoute(GET, '/api/oidc/verify', oidc.verifySubId);
-    apiRoute(GET, '/api/oidc/login', oidc.login);
+    apiRoute(GET, '/api/oidc/authenticate', oidc.authenticateUser);
 
     apiRoute(PST, '/api/totp_recovery/set', recoveryCodes.setRecoveryCodes);
     apiRoute(PST, '/api/totp_recovery/verify', recoveryCodes.veryifyRecoveryCode);

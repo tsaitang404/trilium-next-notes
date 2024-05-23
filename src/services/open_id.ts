@@ -7,8 +7,9 @@ import openIDEncryptionService = require('./encryption/open_id_encryption');
 import options = require('./options');
 
 function isOpenIDEnabled() {
-    if (process.env.ENABLE_OAUTH?.toLocaleLowerCase() === 'true') return true;
-    return false;
+    if (process.env.ENABLE_OAUTH?.toLocaleLowerCase() !== 'true') return false;
+
+    return options.getOptionBool('oAuthEnabled');
 }
 
 function checkOpenIDRequirements() {
@@ -21,13 +22,29 @@ function checkOpenIDRequirements() {
     return true;
 }
 
+function enableOAuth() {
+    options.setOption('oAuthEnabled', true);
+    options.setOption('totpEnabled', false);
+
+    return {success: true, message: 'OAuth Enabled'};
+}
+
+function disableOAuth() {
+    options.setOption('oAuthEnabled', false);
+    return {success: true, message: 'OAuth Disabled'};
+}
+
+function getOAuthStatus() {
+    return {success: true, message: options.getOptionBool('oAuthEnabled')};
+}
+
 async function verifySubId(req: Request, res: Response, next: NextFunction) {
     req.oidc.fetchUserInfo().then((result) => {
         return {success: true, result: openIDEncryptionService.verifyOpenIDSubjectIdentifier(result.sub)};
     });
 }
 
-function login(req: Request, res: Response, next: NextFunction) {
+function authenticateUser(req: Request, res: Response, next: NextFunction) {
     if (openIDService.isSubjectIdentifierSaved()) return {success: false, message: 'User ID already saved!'};
     if (!req.oidc.user) return {success: false, message: 'User not logged in!'};
 
@@ -38,8 +55,11 @@ function login(req: Request, res: Response, next: NextFunction) {
 }
 
 export = {
+    getOAuthStatus,
+    enableOAuth,
+    disableOAuth,
     isOpenIDEnabled,
     checkOpenIDRequirements,
     verifySubId,
-    login,
+    authenticateUser,
 };
