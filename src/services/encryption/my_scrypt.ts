@@ -1,4 +1,6 @@
-"use strict";
+/** @format */
+
+'use strict';
 
 import optionService = require('../options');
 import crypto = require('crypto');
@@ -16,13 +18,44 @@ function getPasswordDerivedKey(password: crypto.BinaryLike) {
 }
 
 function getScryptHash(password: crypto.BinaryLike, salt: crypto.BinaryLike) {
-    const hashed = crypto.scryptSync(password, salt, 32,
-        {N: 16384, r:8, p:1});
+    const hashed = crypto.scryptSync(password, salt, 32, {
+        N: 16384,
+        r: 8,
+        p: 1,
+    });
 
     return hashed;
 }
 
+function getTotpSecretVerificationHash(secret: crypto.BinaryLike) {
+    const salt = optionService.getOption('totpSecretVerificationSalt');
+
+    return getScryptHash(secret, salt);
+}
+
+function getTotpSecretDerivedKey(secret: crypto.BinaryLike) {
+    const salt = optionService.getOption('totpSecretDerivedKeySalt');
+
+    return getScryptHash(secret, salt);
+}
+
+function getSubjectIdentifierVerificationHash(password: crypto.BinaryLike) {
+    const salt = optionService.getOption('subjectIdentifierVerificationSalt');
+
+    return getScryptHash(password, salt);
+}
+
+function getSubjectIdentifierDerivedKey(subjectIdentifer: crypto.BinaryLike) {
+    const salt = optionService.getOption('subjectIdentifierDerivedKeySalt');
+
+    return getScryptHash(subjectIdentifer, salt);
+}
+
 export = {
     getVerificationHash,
-    getPasswordDerivedKey
+    getPasswordDerivedKey,
+    getTotpSecretVerificationHash,
+    getTotpSecretDerivedKey,
+    getSubjectIdentifierVerificationHash,
+    getSubjectIdentifierDerivedKey,
 };

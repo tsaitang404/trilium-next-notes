@@ -1,4 +1,6 @@
-"use strict";
+/** @format */
+
+'use strict';
 
 import utils = require('../services/utils');
 import multer = require('multer');
@@ -10,8 +12,8 @@ import cls = require('../services/cls');
 import sql = require('../services/sql');
 import entityChangesService = require('../services/entity_changes');
 import csurf = require('csurf');
-import { createPartialContentHandler } from "express-partial-content";
-import rateLimit = require("express-rate-limit");
+import {createPartialContentHandler} from 'express-partial-content';
+import rateLimit = require('express-rate-limit');
 import AbstractBeccaEntity = require('../becca/entities/abstract_becca_entity');
 import NotFoundError = require('../errors/not_found_error');
 import ValidationError = require('../errors/validation_error');
@@ -20,6 +22,7 @@ import ValidationError = require('../errors/validation_error');
 import setupRoute = require('./setup');
 import loginRoute = require('./login');
 import indexRoute = require('./index');
+import oidc = require('../services/open_id');
 
 // API routes
 import treeApiRoute = require('./api/tree');
@@ -60,6 +63,8 @@ import etapiTokensApiRoutes = require('./api/etapi_tokens');
 import relationMapApiRoute = require('./api/relation-map');
 import otherRoute = require('./api/other');
 import shareRoutes = require('../share/routes');
+import totp = require('./api/totp');
+import recoveryCodes = require('./api/recovery_codes');
 
 import etapiAuthRoutes = require('../etapi/auth');
 import etapiAppInfoRoutes = require('../etapi/app_info');
@@ -70,32 +75,41 @@ import etapiNoteRoutes = require('../etapi/notes');
 import etapiSpecialNoteRoutes = require('../etapi/special_notes');
 import etapiSpecRoute = require('../etapi/spec');
 import etapiBackupRoute = require('../etapi/backup');
-import { AppRequest, AppRequestHandler } from './route-interface';
+import {AppRequest, AppRequestHandler} from './route-interface';
 
 const csrfMiddleware = csurf({
     cookie: {
-        path: ""       // empty, so cookie is valid only for the current path
-    }
+        path: '', // empty, so cookie is valid only for the current path
+    },
 });
 
 const MAX_ALLOWED_FILE_SIZE_MB = 250;
-const GET = 'get', PST = 'post', PUT = 'put', PATCH = 'patch', DEL = 'delete';
+const GET = 'get',
+    PST = 'post',
+    PUT = 'put',
+    PATCH = 'patch',
+    DEL = 'delete';
 
 type ApiResultHandler = (req: express.Request, res: express.Response, result: unknown) => number;
 
 // TODO: Deduplicate with etapi_utils.ts afterwards.
-type HttpMethod = "all" | "get" | "post" | "put" | "delete" | "patch" | "options" | "head";
+type HttpMethod = 'all' | 'get' | 'post' | 'put' | 'delete' | 'patch' | 'options' | 'head';
 
 const uploadMiddleware = createUploadMiddleware();
 
-const uploadMiddlewareWithErrorHandling = function (req: express.Request, res: express.Response, next: express.NextFunction) {
+const uploadMiddlewareWithErrorHandling = function (
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction
+) {
     uploadMiddleware(req, res, function (err) {
         if (err?.code === 'LIMIT_FILE_SIZE') {
-            res.setHeader("Content-Type", "text/plain")
+            res.setHeader('Content-Type', 'text/plain')
                 .status(400)
-                .send(`Cannot upload file because it excceeded max allowed file size of ${MAX_ALLOWED_FILE_SIZE_MB} MiB`);
-        }
-        else {
+                .send(
+                    `Cannot upload file because it excceeded max allowed file size of ${MAX_ALLOWED_FILE_SIZE_MB} MiB`
+                );
+        } else {
             next();
         }
     });
@@ -109,13 +123,28 @@ function register(app: express.Application) {
     const loginRateLimiter = rateLimit.rateLimit({
         windowMs: 15 * 60 * 1000, // 15 minutes
         max: 10, // limit each IP to 10 requests per windowMs
-        skipSuccessfulRequests: true // successful auth to rate-limited ETAPI routes isn't counted. However, successful auth to /login is still counted!
+        skipSuccessfulRequests: true, // successful auth to rate-limited ETAPI routes isn't counted. However, successful auth to /login is still counted!
     });
 
     route(PST, '/login', [loginRateLimiter], loginRoute.login);
     route(PST, '/logout', [csrfMiddleware, auth.checkAuth], loginRoute.logout);
     route(PST, '/set-password', [auth.checkAppInitialized, auth.checkPasswordNotSet], loginRoute.setPassword);
     route(GET, '/setup', [], setupRoute.setupPage);
+
+    apiRoute(GET, '/api/totp/generate', totp.generateSecret);
+    apiRoute(GET, '/api/totp/enabled', totp.checkForTOTP);
+    apiRoute(PST, '/api/totp/enable', totp.enableTOTP);
+    apiRoute(PST, '/api/totp/disable', totp.disableTOTP);
+    apiRoute(PST, '/api/totp/set', totp.setTotpSecret);
+    apiRoute(GET, '/api/totp/get', totp.getSecret);
+    apiRoute(GET, '/api/oidc/verify', oidc.verifySubId);
+    apiRoute(GET, '/api/oidc/login', oidc.login);
+
+    apiRoute(PST, '/api/totp_recovery/set', recoveryCodes.setRecoveryCodes);
+    apiRoute(PST, '/api/totp_recovery/verify', recoveryCodes.veryifyRecoveryCode);
+    apiRoute(GET, '/api/totp_recovery/generate', recoveryCodes.generateRecoveryCodes);
+    apiRoute(GET, '/api/totp_recovery/enabled', recoveryCodes.checkForRecoveryKeys);
+    apiRoute(GET, '/api/totp_recovery/used', recoveryCodes.getUsedRecoveryCodes);
 
     apiRoute(GET, '/api/tree', treeApiRoute.getTree);
     apiRoute(PST, '/api/tree/load', treeApiRoute.load);
@@ -137,13 +166,24 @@ function register(app: express.Application) {
     apiRoute(PUT, '/api/notes/:noteId/toggle-in-parent/:parentNoteId/:present', cloningApiRoute.toggleNoteInParent);
     apiRoute(PUT, '/api/notes/:noteId/clone-to-note/:parentNoteId', cloningApiRoute.cloneNoteToParentNote);
     apiRoute(PUT, '/api/notes/:noteId/clone-after/:afterBranchId', cloningApiRoute.cloneNoteAfter);
-    route(PUT, '/api/notes/:noteId/file', [auth.checkApiAuthOrElectron, uploadMiddlewareWithErrorHandling, csrfMiddleware],
-        filesRoute.updateFile, apiResultHandler);
+    route(
+        PUT,
+        '/api/notes/:noteId/file',
+        [auth.checkApiAuthOrElectron, uploadMiddlewareWithErrorHandling, csrfMiddleware],
+        filesRoute.updateFile,
+        apiResultHandler
+    );
     route(GET, '/api/notes/:noteId/open', [auth.checkApiAuthOrElectron], filesRoute.openFile);
-    route(GET, '/api/notes/:noteId/open-partial', [auth.checkApiAuthOrElectron],
+    route(
+        GET,
+        '/api/notes/:noteId/open-partial',
+        [auth.checkApiAuthOrElectron],
         createPartialContentHandler(filesRoute.fileContentProvider, {
-            debug: (string, extra) => { console.log(string, extra); }
-        }));
+            debug: (string, extra) => {
+                console.log(string, extra);
+            },
+        })
+    );
     route(GET, '/api/notes/:noteId/download', [auth.checkApiAuthOrElectron], filesRoute.downloadFile);
     // this "hacky" path is used for easier referencing of CSS resources
     route(GET, '/api/notes/download/:noteId', [auth.checkApiAuthOrElectron], filesRoute.downloadFile);
@@ -161,26 +201,48 @@ function register(app: express.Application) {
 
     apiRoute(GET, '/api/notes/:noteId/attachments', attachmentsApiRoute.getAttachments);
     apiRoute(PST, '/api/notes/:noteId/attachments', attachmentsApiRoute.saveAttachment);
-    route(PST, '/api/notes/:noteId/attachments/upload', [auth.checkApiAuthOrElectron, uploadMiddlewareWithErrorHandling, csrfMiddleware], attachmentsApiRoute.uploadAttachment, apiResultHandler);
+    route(
+        PST,
+        '/api/notes/:noteId/attachments/upload',
+        [auth.checkApiAuthOrElectron, uploadMiddlewareWithErrorHandling, csrfMiddleware],
+        attachmentsApiRoute.uploadAttachment,
+        apiResultHandler
+    );
     apiRoute(GET, '/api/attachments/:attachmentId', attachmentsApiRoute.getAttachment);
     apiRoute(GET, '/api/attachments/:attachmentId/all', attachmentsApiRoute.getAllAttachments);
     apiRoute(PST, '/api/attachments/:attachmentId/convert-to-note', attachmentsApiRoute.convertAttachmentToNote);
     apiRoute(DEL, '/api/attachments/:attachmentId', attachmentsApiRoute.deleteAttachment);
     apiRoute(PUT, '/api/attachments/:attachmentId/rename', attachmentsApiRoute.renameAttachment);
     apiRoute(GET, '/api/attachments/:attachmentId/blob', attachmentsApiRoute.getAttachmentBlob);
-    route(GET, '/api/attachments/:attachmentId/image/:filename', [auth.checkApiAuthOrElectron], imageRoute.returnAttachedImage);
+    route(
+        GET,
+        '/api/attachments/:attachmentId/image/:filename',
+        [auth.checkApiAuthOrElectron],
+        imageRoute.returnAttachedImage
+    );
     route(GET, '/api/attachments/:attachmentId/open', [auth.checkApiAuthOrElectron], filesRoute.openAttachment);
-    route(GET, '/api/attachments/:attachmentId/open-partial', [auth.checkApiAuthOrElectron],
+    route(
+        GET,
+        '/api/attachments/:attachmentId/open-partial',
+        [auth.checkApiAuthOrElectron],
         createPartialContentHandler(filesRoute.attachmentContentProvider, {
-            debug: (string, extra) => { console.log(string, extra); }
-        }));
+            debug: (string, extra) => {
+                console.log(string, extra);
+            },
+        })
+    );
     route(GET, '/api/attachments/:attachmentId/download', [auth.checkApiAuthOrElectron], filesRoute.downloadAttachment);
     // this "hacky" path is used for easier referencing of CSS resources
     route(GET, '/api/attachments/download/:attachmentId', [auth.checkApiAuthOrElectron], filesRoute.downloadAttachment);
     apiRoute(PST, '/api/attachments/:attachmentId/save-to-tmp-dir', filesRoute.saveAttachmentToTmpDir);
     apiRoute(PST, '/api/attachments/:attachmentId/upload-modified-file', filesRoute.uploadModifiedFileToAttachment);
-    route(PUT, '/api/attachments/:attachmentId/file', [auth.checkApiAuthOrElectron, uploadMiddlewareWithErrorHandling, csrfMiddleware],
-        filesRoute.updateAttachment, apiResultHandler);
+    route(
+        PUT,
+        '/api/attachments/:attachmentId/file',
+        [auth.checkApiAuthOrElectron, uploadMiddlewareWithErrorHandling, csrfMiddleware],
+        filesRoute.updateAttachment,
+        apiResultHandler
+    );
 
     apiRoute(GET, '/api/notes/:noteId/revisions', revisionsApiRoute.getRevisions);
     apiRoute(DEL, '/api/notes/:noteId/revisions', revisionsApiRoute.eraseAllRevisions);
@@ -188,14 +250,40 @@ function register(app: express.Application) {
     apiRoute(GET, '/api/revisions/:revisionId/blob', revisionsApiRoute.getRevisionBlob);
     apiRoute(DEL, '/api/revisions/:revisionId', revisionsApiRoute.eraseRevision);
     apiRoute(PST, '/api/revisions/:revisionId/restore', revisionsApiRoute.restoreRevision);
-    route(GET, '/api/revisions/:revisionId/image/:filename', [auth.checkApiAuthOrElectron], imageRoute.returnImageFromRevision);
+    route(
+        GET,
+        '/api/revisions/:revisionId/image/:filename',
+        [auth.checkApiAuthOrElectron],
+        imageRoute.returnImageFromRevision
+    );
 
-    route(GET, '/api/revisions/:revisionId/download', [auth.checkApiAuthOrElectron], revisionsApiRoute.downloadRevision);
+    route(
+        GET,
+        '/api/revisions/:revisionId/download',
+        [auth.checkApiAuthOrElectron],
+        revisionsApiRoute.downloadRevision
+    );
 
-
-    route(GET, '/api/branches/:branchId/export/:type/:format/:version/:taskId', [auth.checkApiAuthOrElectron], exportRoute.exportBranch);
-    route(PST, '/api/notes/:parentNoteId/notes-import', [auth.checkApiAuthOrElectron, uploadMiddlewareWithErrorHandling, csrfMiddleware], importRoute.importNotesToBranch, apiResultHandler);
-    route(PST, '/api/notes/:parentNoteId/attachments-import', [auth.checkApiAuthOrElectron, uploadMiddlewareWithErrorHandling, csrfMiddleware], importRoute.importAttachmentsToNote, apiResultHandler);
+    route(
+        GET,
+        '/api/branches/:branchId/export/:type/:format/:version/:taskId',
+        [auth.checkApiAuthOrElectron],
+        exportRoute.exportBranch
+    );
+    route(
+        PST,
+        '/api/notes/:parentNoteId/notes-import',
+        [auth.checkApiAuthOrElectron, uploadMiddlewareWithErrorHandling, csrfMiddleware],
+        importRoute.importNotesToBranch,
+        apiResultHandler
+    );
+    route(
+        PST,
+        '/api/notes/:parentNoteId/attachments-import',
+        [auth.checkApiAuthOrElectron, uploadMiddlewareWithErrorHandling, csrfMiddleware],
+        importRoute.importAttachmentsToNote,
+        apiResultHandler
+    );
 
     apiRoute(GET, '/api/notes/:noteId/attributes', attributesRoute.getEffectiveNoteAttributes);
     apiRoute(PST, '/api/notes/:noteId/attributes', attributesRoute.addNoteAttribute);
@@ -210,7 +298,13 @@ function register(app: express.Application) {
 
     // :filename is not used by trilium, but instead used for "save as" to assign a human-readable filename
     route(GET, '/api/images/:noteId/:filename', [auth.checkApiAuthOrElectron], imageRoute.returnImageFromNote);
-    route(PUT, '/api/images/:noteId', [auth.checkApiAuthOrElectron, uploadMiddlewareWithErrorHandling, csrfMiddleware], imageRoute.updateImage, apiResultHandler);
+    route(
+        PUT,
+        '/api/images/:noteId',
+        [auth.checkApiAuthOrElectron, uploadMiddlewareWithErrorHandling, csrfMiddleware],
+        imageRoute.updateImage,
+        apiResultHandler
+    );
 
     apiRoute(GET, '/api/options', optionsApiRoute.getOptions);
     // FIXME: possibly change to sending value in the body to avoid host of HTTP server issues with slashes
@@ -229,22 +323,55 @@ function register(app: express.Application) {
     route(GET, '/api/sync/changed', [auth.checkApiAuth], syncApiRoute.getChanged, apiResultHandler);
     route(PUT, '/api/sync/update', [auth.checkApiAuth], syncApiRoute.update, apiResultHandler);
     route(PST, '/api/sync/finished', [auth.checkApiAuth], syncApiRoute.syncFinished, apiResultHandler);
-    route(PST, '/api/sync/check-entity-changes', [auth.checkApiAuth], syncApiRoute.checkEntityChanges, apiResultHandler);
-    route(PST, '/api/sync/queue-sector/:entityName/:sector', [auth.checkApiAuth], syncApiRoute.queueSector, apiResultHandler);
+    route(
+        PST,
+        '/api/sync/check-entity-changes',
+        [auth.checkApiAuth],
+        syncApiRoute.checkEntityChanges,
+        apiResultHandler
+    );
+    route(
+        PST,
+        '/api/sync/queue-sector/:entityName/:sector',
+        [auth.checkApiAuth],
+        syncApiRoute.queueSector,
+        apiResultHandler
+    );
     route(GET, '/api/sync/stats', [], syncApiRoute.getStats, apiResultHandler);
 
     apiRoute(PST, '/api/recent-notes', recentNotesRoute.addRecentNote);
     apiRoute(GET, '/api/app-info', appInfoRoute.getAppInfo);
 
     // docker health check
-    route(GET, '/api/health-check', [], () => ({ "status": "ok" }), apiResultHandler);
+    route(GET, '/api/health-check', [], () => ({status: 'ok'}), apiResultHandler);
 
     // group of the services below are meant to be executed from the outside
     route(GET, '/api/setup/status', [], setupApiRoute.getStatus, apiResultHandler);
-    route(PST, '/api/setup/new-document', [auth.checkAppNotInitialized], setupApiRoute.setupNewDocument, apiResultHandler, false);
-    route(PST, '/api/setup/sync-from-server', [auth.checkAppNotInitialized], setupApiRoute.setupSyncFromServer, apiResultHandler, false);
+    route(
+        PST,
+        '/api/setup/new-document',
+        [auth.checkAppNotInitialized],
+        setupApiRoute.setupNewDocument,
+        apiResultHandler,
+        false
+    );
+    route(
+        PST,
+        '/api/setup/sync-from-server',
+        [auth.checkAppNotInitialized],
+        setupApiRoute.setupSyncFromServer,
+        apiResultHandler,
+        false
+    );
     route(GET, '/api/setup/sync-seed', [auth.checkCredentials], setupApiRoute.getSyncSeed, apiResultHandler);
-    route(PST, '/api/setup/sync-seed', [auth.checkAppNotInitialized], setupApiRoute.saveSyncSeed, apiResultHandler, false);
+    route(
+        PST,
+        '/api/setup/sync-seed',
+        [auth.checkAppNotInitialized],
+        setupApiRoute.saveSyncSeed,
+        apiResultHandler,
+        false
+    );
 
     apiRoute(GET, '/api/autocomplete', autocompleteApiRoute.getAutocomplete);
     apiRoute(GET, '/api/quick-search/:searchString', searchRoute.quickSearch);
@@ -295,17 +422,45 @@ function register(app: express.Application) {
 
     apiRoute(GET, '/api/sql/schema', sqlRoute.getSchema);
     apiRoute(PST, '/api/sql/execute/:noteId', sqlRoute.execute);
-    route(PST, '/api/database/anonymize/:type', [auth.checkApiAuthOrElectron, csrfMiddleware], databaseRoute.anonymize, apiResultHandler, false);
+    route(
+        PST,
+        '/api/database/anonymize/:type',
+        [auth.checkApiAuthOrElectron, csrfMiddleware],
+        databaseRoute.anonymize,
+        apiResultHandler,
+        false
+    );
     apiRoute(GET, '/api/database/anonymized-databases', databaseRoute.getExistingAnonymizedDatabases);
 
     // backup requires execution outside of transaction
-    route(PST, '/api/database/backup-database', [auth.checkApiAuthOrElectron, csrfMiddleware], databaseRoute.backupDatabase, apiResultHandler, false);
+    route(
+        PST,
+        '/api/database/backup-database',
+        [auth.checkApiAuthOrElectron, csrfMiddleware],
+        databaseRoute.backupDatabase,
+        apiResultHandler,
+        false
+    );
     apiRoute(GET, '/api/database/backups', databaseRoute.getExistingBackups);
 
     // VACUUM requires execution outside of transaction
-    route(PST, '/api/database/vacuum-database', [auth.checkApiAuthOrElectron, csrfMiddleware], databaseRoute.vacuumDatabase, apiResultHandler, false);
+    route(
+        PST,
+        '/api/database/vacuum-database',
+        [auth.checkApiAuthOrElectron, csrfMiddleware],
+        databaseRoute.vacuumDatabase,
+        apiResultHandler,
+        false
+    );
 
-    route(PST, '/api/database/find-and-fix-consistency-issues', [auth.checkApiAuthOrElectron, csrfMiddleware], databaseRoute.findAndFixConsistencyIssues, apiResultHandler, false);
+    route(
+        PST,
+        '/api/database/find-and-fix-consistency-issues',
+        [auth.checkApiAuthOrElectron, csrfMiddleware],
+        databaseRoute.findAndFixConsistencyIssues,
+        apiResultHandler,
+        false
+    );
 
     apiRoute(GET, '/api/database/check-integrity', databaseRoute.checkIntegrity);
 
@@ -319,7 +474,13 @@ function register(app: express.Application) {
 
     // no CSRF since this is called from android app
     route(PST, '/api/sender/login', [loginRateLimiter], loginApiRoute.token, apiResultHandler);
-    route(PST, '/api/sender/image', [auth.checkEtapiToken, uploadMiddlewareWithErrorHandling], senderRoute.uploadImage, apiResultHandler);
+    route(
+        PST,
+        '/api/sender/image',
+        [auth.checkEtapiToken, uploadMiddlewareWithErrorHandling],
+        senderRoute.uploadImage,
+        apiResultHandler
+    );
     route(PST, '/api/sender/note', [auth.checkEtapiToken], senderRoute.saveNote, apiResultHandler);
 
     apiRoute(GET, '/api/keyboard-actions', keysRoute.getKeyboardActions);
@@ -363,25 +524,24 @@ function register(app: express.Application) {
 function convertEntitiesToPojo(result: unknown) {
     if (result instanceof AbstractBeccaEntity) {
         result = result.getPojo();
-    }
-    else if (Array.isArray(result)) {
+    } else if (Array.isArray(result)) {
         for (const idx in result) {
             if (result[idx] instanceof AbstractBeccaEntity) {
                 result[idx] = result[idx].getPojo();
             }
         }
-    }
-    else if (result && typeof result === "object") {
-        if ("note" in result && result.note instanceof AbstractBeccaEntity) {
+    } else if (result && typeof result === 'object') {
+        if ('note' in result && result.note instanceof AbstractBeccaEntity) {
             result.note = result.note.getPojo();
         }
 
-        if ("branch" in result && result.branch instanceof AbstractBeccaEntity) {
+        if ('branch' in result && result.branch instanceof AbstractBeccaEntity) {
             result.branch = result.branch.getPojo();
         }
     }
 
-    if (result && typeof result === "object" && "executionResult" in result) { // from runOnBackend()
+    if (result && typeof result === 'object' && 'executionResult' in result) {
+        // from runOnBackend()
         result.executionResult = convertEntitiesToPojo(result.executionResult);
     }
 
@@ -398,15 +558,15 @@ function apiResultHandler(req: express.Request, res: express.Response, result: u
         const [statusCode, response] = result;
 
         if (statusCode !== 200 && statusCode !== 201 && statusCode !== 204) {
-            log.info(`${req.method} ${req.originalUrl} returned ${statusCode} with response ${JSON.stringify(response)}`);
+            log.info(
+                `${req.method} ${req.originalUrl} returned ${statusCode} with response ${JSON.stringify(response)}`
+            );
         }
 
         return send(res, statusCode, response);
-    }
-    else if (result === undefined) {
-        return send(res, 204, "");
-    }
-    else {
+    } else if (result === undefined) {
+        return send(res, 204, '');
+    } else {
         return send(res, 200, result);
     }
 }
@@ -414,17 +574,16 @@ function apiResultHandler(req: express.Request, res: express.Response, result: u
 function send(res: express.Response, statusCode: number, response: unknown) {
     if (typeof response === 'string') {
         if (statusCode >= 400) {
-            res.setHeader("Content-Type", "text/plain");
+            res.setHeader('Content-Type', 'text/plain');
         }
 
         res.status(statusCode).send(response);
 
         return response.length;
-    }
-    else {
+    } else {
         const json = JSON.stringify(response);
 
-        res.setHeader("Content-Type", "application/json");
+        res.setHeader('Content-Type', 'application/json');
         res.status(statusCode).send(json);
 
         return json.length;
@@ -435,43 +594,60 @@ function apiRoute(method: HttpMethod, path: string, routeHandler: express.Handle
     route(method, path, [auth.checkApiAuth, csrfMiddleware], routeHandler, apiResultHandler);
 }
 
-function route(method: HttpMethod, path: string, middleware: (express.Handler | AppRequestHandler)[], routeHandler: AppRequestHandler, resultHandler: ApiResultHandler | null = null, transactional = true) {
-    router[method](path, ...(middleware as express.Handler[]), (req: express.Request, res: express.Response, next: express.NextFunction) => {
-        const start = Date.now();
+function route(
+    method: HttpMethod,
+    path: string,
+    middleware: (express.Handler | AppRequestHandler)[],
+    routeHandler: AppRequestHandler,
+    resultHandler: ApiResultHandler | null = null,
+    transactional = true
+) {
+    router[method](
+        path,
+        ...(middleware as express.Handler[]),
+        (req: express.Request, res: express.Response, next: express.NextFunction) => {
+            const start = Date.now();
 
-        try {
-            cls.namespace.bindEmitter(req);
-            cls.namespace.bindEmitter(res);
+            try {
+                cls.namespace.bindEmitter(req);
+                cls.namespace.bindEmitter(res);
 
-            const result = cls.init(() => {
-                cls.set('componentId', req.headers['trilium-component-id']);
-                cls.set('localNowDateTime', req.headers['trilium-local-now-datetime']);
-                cls.set('hoistedNoteId', req.headers['trilium-hoisted-note-id'] || 'root');
+                const result = cls.init(() => {
+                    cls.set('componentId', req.headers['trilium-component-id']);
+                    cls.set('localNowDateTime', req.headers['trilium-local-now-datetime']);
+                    cls.set('hoistedNoteId', req.headers['trilium-hoisted-note-id'] || 'root');
 
-                const cb = () => routeHandler(req as AppRequest, res, next);
+                    const cb = () => routeHandler(req as AppRequest, res, next);
 
-                return transactional ? sql.transactional(cb) : cb();
-            });
+                    return transactional ? sql.transactional(cb) : cb();
+                });
 
-            if (!resultHandler) {
-                return;
-            }
+                if (!resultHandler) {
+                    return;
+                }
 
-            if (result?.then) { // promise
-                result
-                    .then((promiseResult: unknown) => handleResponse(resultHandler, req, res, promiseResult, start))
-                    .catch((e: any) => handleException(e, method, path, res));
-            } else {
-                handleResponse(resultHandler, req, res, result, start)
+                if (result?.then) {
+                    // promise
+                    result
+                        .then((promiseResult: unknown) => handleResponse(resultHandler, req, res, promiseResult, start))
+                        .catch((e: any) => handleException(e, method, path, res));
+                } else {
+                    handleResponse(resultHandler, req, res, result, start);
+                }
+            } catch (e) {
+                handleException(e, method, path, res);
             }
         }
-        catch (e) {
-            handleException(e, method, path, res);
-        }
-    });
+    );
 }
 
-function handleResponse(resultHandler: ApiResultHandler, req: express.Request, res: express.Response, result: unknown, start: number) {
+function handleResponse(
+    resultHandler: ApiResultHandler,
+    req: express.Request,
+    res: express.Response,
+    result: unknown,
+    start: number
+) {
     const responseLength = resultHandler(req, res, result);
 
     log.request(req, res, Date.now() - start, responseLength);
@@ -481,20 +657,17 @@ function handleException(e: any, method: HttpMethod, path: string, res: express.
     log.error(`${method} ${path} threw exception: '${e.message}', stack: ${e.stack}`);
 
     if (e instanceof ValidationError) {
-        res.status(400)
-            .json({
-                message: e.message
-            });
+        res.status(400).json({
+            message: e.message,
+        });
     } else if (e instanceof NotFoundError) {
-        res.status(404)
-            .json({
-                message: e.message
-            });
+        res.status(404).json({
+            message: e.message,
+        });
     } else {
-        res.status(500)
-            .json({
-                message: e.message
-            });
+        res.status(500).json({
+            message: e.message,
+        });
     }
 }
 
@@ -503,14 +676,14 @@ function createUploadMiddleware() {
         fileFilter: (req: express.Request, file, cb) => {
             // UTF-8 file names are not well decoded by multer/busboy, so we handle the conversion on our side.
             // See https://github.com/expressjs/multer/pull/1102.
-            file.originalname = Buffer.from(file.originalname, "latin1").toString("utf-8");
+            file.originalname = Buffer.from(file.originalname, 'latin1').toString('utf-8');
             cb(null, true);
-        }
+        },
     };
 
     if (!process.env.TRILIUM_NO_UPLOAD_LIMIT) {
         multerOptions.limits = {
-            fileSize: MAX_ALLOWED_FILE_SIZE_MB * 1024 * 1024
+            fileSize: MAX_ALLOWED_FILE_SIZE_MB * 1024 * 1024,
         };
     }
 
@@ -518,5 +691,5 @@ function createUploadMiddleware() {
 }
 
 export = {
-    register
+    register,
 };

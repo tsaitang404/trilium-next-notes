@@ -19,35 +19,9 @@
                     Password is incorrect. Please try again.
                 </div>
                 <% } %>
-
-                    <form action="login" method="POST">
-                        <div class="form-group">
-                            <label for="password">Password</label>
-                            <div class="controls">
-                                <input id="password" name="password" placeholder="" class="form-control"
-                                    type="password" />
-                            </div>
-                        </div>
-                        <% if( totpEnabled ) { %>
-                            <div class="form-group">
-                                <label for="otp-token">OTP Token</label>
-                                <div class="controls">
-                                    <input id="token" name="token" placeholder="" class="form-control" type="text"
-                                        required />
-                                </div>
-                                <% } %>
-                                    <div class="form-group">
-                                        <div class="checkbox">
-                                            <label>
-                                                <input id="remember-me" name="rememberMe" value="1" type="checkbox" />
-                                                Remember me
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <button class="btn btn-success">Login</button>
-                                    </div>
-                    </form>
+                    <div>
+                        <button href="http://localhost:8080/auth">Login with OAuth</button>
+                    </div>
         </div>
     </div>
 
