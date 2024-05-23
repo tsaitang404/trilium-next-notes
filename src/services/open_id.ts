@@ -9,7 +9,11 @@ import options = require('./options');
 function isOpenIDEnabled() {
     if (process.env.ENABLE_OAUTH?.toLocaleLowerCase() !== 'true') return false;
 
-    return options.getOptionBool('oAuthEnabled');
+    try {
+        return options.getOptionBool('oAuthEnabled');
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkOpenIDRequirements() {
@@ -46,12 +50,14 @@ async function verifySubId(req: Request, res: Response, next: NextFunction) {
 
 function authenticateUser(req: Request, res: Response, next: NextFunction) {
     if (openIDService.isSubjectIdentifierSaved()) return {success: false, message: 'User ID already saved!'};
-    if (!req.oidc.user) return {success: false, message: 'User not logged in!'};
+    if (!req.oidc.user) {
+        res.redirect('/auth');
+    }
 
     req.oidc.fetchUserInfo().then((result) => {
         openIDService.saveSubjectIdentifier(result.sub);
     });
-    return {success: true, message: 'User ' + req.oidc.user.sub + ' saved!'};
+    return {success: true, message: 'User ' + req.oidc.user?.sub + ' saved!'};
 }
 
 export = {
