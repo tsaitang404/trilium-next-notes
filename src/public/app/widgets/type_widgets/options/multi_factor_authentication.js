@@ -45,8 +45,8 @@ const TPL = `
     <div class="totp-details">
         <div>
             <div class="form-group">
-                <label>Password confirmation</label>
-                <input class="password form-control" type="password">
+                <label>Authenticator Code</label>
+                <input class="authenticator-code" type="text">
             </div>
             <div class="options-section">
                 <label>
@@ -111,15 +111,13 @@ export default class MultiFactorAuthenticationOptions extends OptionsWidget {
         this.$totpSecret = this.$widget.find('.totp-secret');
         this.$totpSecretInput = this.$widget.find('.totp-secret-input');
         this.$saveTotpButton = this.$widget.find('.save-totp');
-        this.$password = this.$widget.find('.password');
+        this.$authenticatorCode = this.$widget.find('.authenticator-code');
         this.$generateRecoveryCodeButton = this.$widget.find('.generate-recovery-code');
         this.$oAuthEnabledCheckbox = this.$widget.find('.oauth-enabled-checkbox');
         this.$authenticateuserButton = this.$widget.find('.authenticate-user-button');
         this.$recoveryKeys = [];
 
         for (let i = 0; i < 8; i++) this.$recoveryKeys.push(this.$widget.find('.key_' + i));
-
-        this.$mfaHeadding.text('Time-Based One Time Password (TOTP)');
 
         this.$totpEnabled.on('change', async () => {
             this.updateSecret();
@@ -209,7 +207,7 @@ export default class MultiFactorAuthenticationOptions extends OptionsWidget {
                 this.$saveTotpButton.prop('disabled', !result.message);
                 this.$totpSecret.prop('disapbled', !result.message);
                 this.$regenerateTotpButton.prop('disabled', !result.message);
-                this.$password.prop('disabled', !result.message);
+                this.$authenticatorCode.prop('disabled', !result.message);
                 this.$generateRecoveryCodeButton.prop('disabled', !result.message);
             } else {
                 toastService.showError(result.message);
@@ -235,7 +233,7 @@ export default class MultiFactorAuthenticationOptions extends OptionsWidget {
         server
             .post('totp/set', {
                 secret: this.$totpSecretInput.val(),
-                password: this.$password.val(),
+                authenticatorCode: this.$authenticatorCode.val(),
             })
             .then((result) => {
                 if (result.success) {

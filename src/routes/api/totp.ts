@@ -30,8 +30,14 @@ function disableTOTP() {
 }
 
 function setTotpSecret(req: Request) {
-    if (!passwordEncryptionService.verifyPassword(req.body.password))
-        throw new ValidationError('Incorrect password reset confirmation');
+    const authenticationResult = speakeasy.totp.verify({
+        secret: req.body.secret,
+        encoding: 'base32',
+        token: req.body.authenticatorCode,
+        window: 1,
+    });
+
+    if (!authenticationResult) throw new ValidationError('TOTP does not match authenticator secret!');
 
     const newSecret = req.body.secret.trim();
     const regex = RegExp(/^[a-zA-Z0-9]{52}$/gm);
@@ -39,6 +45,7 @@ function setTotpSecret(req: Request) {
     if (!regex.test(newSecret)) return;
 
     totp_fs.saveTotpSecret(newSecret);
+    // TODO: let the user know that the operatoin was successful
 }
 
 function getSecret() {
