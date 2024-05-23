@@ -22,8 +22,7 @@ import ValidationError = require('../errors/validation_error');
 import setupRoute = require('./setup');
 import loginRoute = require('./login');
 import indexRoute = require('./index');
-import callbackRoute = require('./callback');
-import oidc = require('../services/login/oidc_testing');
+import oidc = require('../services/open_id');
 
 // API routes
 import treeApiRoute = require('./api/tree');
@@ -77,10 +76,6 @@ import etapiSpecialNoteRoutes = require('../etapi/special_notes');
 import etapiSpecRoute = require('../etapi/spec');
 import etapiBackupRoute = require('../etapi/backup');
 import {AppRequest, AppRequestHandler} from './route-interface';
-import callback = require('./callback');
-import {LogoutOptions} from 'express-openid-connect';
-
-import openIDService = require('../services/open_id');
 
 const csrfMiddleware = csurf({
     cookie: {
@@ -124,10 +119,6 @@ function register(app: express.Application) {
     route(GET, '/', [auth.checkAuth, csrfMiddleware], indexRoute.index);
     route(GET, '/login', [auth.checkAppInitialized, auth.checkPasswordSet], loginRoute.loginPage);
     route(GET, '/set-password', [auth.checkAppInitialized, auth.checkPasswordNotSet], loginRoute.setPasswordPage);
-    route(GET, '/auth-failed', [], loginRoute.authFailedPage);
-    // route(GET, '/info', [], oidc.explain)
-    // route(GET, '/callback', [oidc.authCallback], oidc.callback)
-    // route(GET, '/logot', [], oidc.logoutOfOidc);
 
     const loginRateLimiter = rateLimit.rateLimit({
         windowMs: 15 * 60 * 1000, // 15 minutes
@@ -146,10 +137,8 @@ function register(app: express.Application) {
     apiRoute(PST, '/api/totp/disable', totp.disableTOTP);
     apiRoute(PST, '/api/totp/set', totp.setTotpSecret);
     apiRoute(GET, '/api/totp/get', totp.getSecret);
-    apiRoute(GET, '/api/oidc/info', oidc.explain);
     apiRoute(GET, '/api/oidc/verify', oidc.verifySubId);
     apiRoute(GET, '/api/oidc/login', oidc.login);
-    apiRoute(GET, '/api/oidc/check', oidc.check);
 
     apiRoute(PST, '/api/totp_recovery/set', recoveryCodes.setRecoveryCodes);
     apiRoute(PST, '/api/totp_recovery/verify', recoveryCodes.veryifyRecoveryCode);

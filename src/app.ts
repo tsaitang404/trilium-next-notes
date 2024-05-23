@@ -14,8 +14,8 @@ import openID = require('./services/open_id');
 import {Request, Response, NextFunction} from 'express';
 import {userInfo} from 'os';
 import {request} from 'http';
-import a = require('./services/login/oidc_testing');
-import oidc_testing = require('./services/login/oidc_testing');
+import a = require('./services/open_id');
+import oidc_testing = require('./services/open_id');
 
 require('./services/handlers');
 require('./becca/becca_loader');
@@ -75,8 +75,6 @@ app.use(sessionParser);
 app.use(favicon(`${__dirname}/../images/app-icons/win/icon.ico`));
 
 if (openID.checkOpenIDRequirements()) app.use(oidc.auth(authConfig));
-
-app.get('/info', a.explain);
 
 require('./routes/assets').register(app);
 require('./routes/routes').register(app);

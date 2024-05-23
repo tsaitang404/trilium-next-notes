@@ -31,17 +31,6 @@ function loginPage(req: Request, res: Response) {
         });
 }
 
-function authFailedPage(req: Request, res: Response) {
-    // console.log( req.oidc.isAuthenticated())
-    res.render('auth-failed', {
-        failedAuth: false,
-        totpEnabled: optionService.getOption('totpEnabled') && totp_secret.checkForTotSecret(),
-        openIDEnabled: openIDService.isOpenIDEnabled(),
-        assetPath: assetPath,
-        appPath: appPath,
-    });
-}
-
 function setPasswordPage(req: Request, res: Response) {
     res.render('set_password', {
         error: false,
@@ -158,5 +147,4 @@ export = {
     setPassword,
     login,
     logout,
-    authFailedPage,
 };
