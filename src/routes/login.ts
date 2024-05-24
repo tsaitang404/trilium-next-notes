@@ -10,7 +10,7 @@ import passwordService = require('../services/encryption/password');
 import assetPath = require('../services/asset_path');
 import appPath = require('../services/app_path');
 import ValidationError = require('../errors/validation_error');
-import totp_secret = require('../services/totp_secret');
+import totp_secret = require('../services/totp');
 import {Request, Response} from 'express';
 import {AppRequest} from './route-interface';
 import recoveryCodeService = require('../services/encryption/recovery_codes');
