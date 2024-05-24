@@ -1,7 +1,6 @@
 /** @format */
 
 import server from '../../../services/server.js';
-import protectedSessionHolder from '../../../services/protected_session_holder.js';
 import toastService from '../../../services/toast.js';
 import OptionsWidget from './options_widget.js';
 
@@ -9,12 +8,18 @@ const TPL = `
 <div class="options-section">
     <h2 class=""><b>What is Multi-Factor Authentication?</b></h2>
     <div class="">
-        <i>MFA description</i>
+        <i>
+            Multi-Factor Authentication (MFA) adds an extra layer of security to your account. Instead
+             of just entering a password to log in, MFA requires you to provide one or more additional 
+             pieces of evidence to verify your identity. This way, even if someone gets hold of your 
+             password, they still can't access your account without the second piece of information. 
+             It's like adding an extra lock to your door, making it much harder for anyone else to 
+             break in.</i>
     </div>
     <br>
     <div>
-        <h3><b>OAuth</b></h3>
-        <span>This is what OAuth is</span>
+        <h3><b>OAuth/OpenID</b></h3>
+        <span><i>OpenID is a standardized way to let you log into websites using an account from another service, like Google, to verify your identity.</i></span>
         <div>
             <label>
             <b>Enable OAuth</b>
@@ -26,7 +31,7 @@ const TPL = `
         </div>
     </div>
     <br>
-    <h3><b>Time-based One-Time Password<b></h3>
+    <h3><b>Time-based One-Time Password</b></h3>
     <div>
         <label>
         <b>Enable TOTP</b>
@@ -34,7 +39,9 @@ const TPL = `
         <input type="checkbox" class="totp-enabled"  />
     </div>
     <div>
-        <span>This is what TOTP is</span>
+        <span><i>TOTP (Time-Based One-Time Password) is a security feature that generates a unique, temporary 
+        code which changes every 30 seconds. You use this code, along with your password to log into your 
+        account, making it much harder for anyone else to access it.</i></span>
     </div>
     <br>
     <h4> Generate TOTP Secret </h4>
@@ -46,7 +53,7 @@ const TPL = `
     <br>
     <h4> Single Sign-on Recovery Keys </h4>
     <div>
-        <span >Single sign-on recovery keys are used to login in the event you cannot access your Authenticator codes. Keep them somewhere safe and secure. </span>
+        <span ><i>Single sign-on recovery keys are used to login in the event you cannot access your Authenticator codes. Keep them somewhere safe and secure. </i></span>
         <br><br>
         <span class="alert alert-warning" role="alert" style="font-weight: bold; color: red !important;">After a recovery key is used it cannot be used again.</span>
         <br><br>

@@ -20,6 +20,7 @@ function checkOpenIDRequirements() {
     if (process.env.CLIENT_ID === undefined) throw new OpenIDError('CLIENT_ID is undefined in .env!');
     if (process.env.ISSUER_BASE_URL === undefined) throw new OpenIDError('ISSUER_BASE_URL is undefined in .env!');
     if (process.env.SECRET === undefined) throw new OpenIDError('SECRET is undefined in .env!');
+    if (process.env.AUTH_0_LOGOUT === undefined) throw new OpenIDError('AUTH_0_LOGOUT is undefined in .env!');
 
     return true;
 }
@@ -52,7 +53,41 @@ function authenticateUser(req: Request, res: Response, next: NextFunction) {
     return {success: true, message: 'User ' + req.oidc.user?.sub + ' saved!'};
 }
 
+function checkAuth0Logout() {
+    if (process.env.AUTH_0_LOGOUT === undefined) return false;
+    if (process.env.AUTH_0_LOGOUT.toLocaleLowerCase() === 'true') return true;
+    return false;
+}
+
+function generateOAuthConfig() {
+    const authRoutes = {
+        callback: '/callback',
+        login: '/auth',
+        postLogoutRedirect: '/login',
+        logout: '/logout',
+    };
+
+    const logoutParams = {
+        end_session_endpoint: '/end-session/',
+    };
+
+    const authConfig = {
+        authRequired: true,
+        auth0Logout: checkAuth0Logout(),
+        baseURL: process.env.BASE_URL,
+        clientID: process.env.CLIENT_ID,
+        issuerBaseURL: process.env.ISSUER_BASE_URL,
+        secret: process.env.SECRET,
+        // scope: 'code',
+        routes: authRoutes,
+        idpLogout: true,
+        logoutParams: logoutParams,
+    };
+    return authConfig;
+}
+
 export = {
+    generateOAuthConfig,
     getOAuthStatus,
     enableOAuth,
     disableOAuth,

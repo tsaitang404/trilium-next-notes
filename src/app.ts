@@ -23,30 +23,6 @@ require('dotenv').config();
 
 const app = express();
 
-const authRoutes = {
-    callback: '/callback',
-    login: '/auth',
-    postLogoutRedirect: '/login',
-    logout: '/logout',
-};
-
-const logoutParams = {
-    end_session_endpoint: '/end-session/',
-};
-
-const authConfig = {
-    authRequired: true,
-    auth0Logout: false,
-    baseURL: process.env.BASE_URL,
-    clientID: process.env.CLIENT_ID,
-    issuerBaseURL: process.env.ISSUER_BASE_URL,
-    secret: process.env.SECRET,
-    // scope: 'code',
-    routes: authRoutes,
-    idpLogout: true,
-    logoutParams: logoutParams,
-};
-
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
@@ -74,7 +50,7 @@ app.use(`/robots.txt`, express.static(path.join(__dirname, 'public/robots.txt'))
 app.use(sessionParser);
 app.use(favicon(`${__dirname}/../images/app-icons/win/icon.ico`));
 
-if (openID.checkOpenIDRequirements()) app.use(oidc.auth(authConfig));
+if (openID.checkOpenIDRequirements()) app.use(oidc.auth(openID.generateOAuthConfig()));
 
 require('./routes/assets').register(app);
 require('./routes/routes').register(app);
