@@ -22,7 +22,7 @@ import ValidationError = require('../errors/validation_error');
 import setupRoute = require('./setup');
 import loginRoute = require('./login');
 import indexRoute = require('./index');
-import oidc = require('../services/open_id');
+import openID = require('../services/open_id');
 
 // API routes
 import treeApiRoute = require('./api/tree');
@@ -135,14 +135,12 @@ function register(app: express.Application) {
     apiRoute(GET, '/api/totp/status', totp.getTOTPStatus);
     apiRoute(PST, '/api/totp/enable', totp.enableTOTP);
     apiRoute(PST, '/api/totp/disable', totp.disableTOTP);
-    apiRoute(PST, '/api/totp/set', totp.setTotpSecret);
     apiRoute(GET, '/api/totp/get', totp.getSecret);
 
-    apiRoute(GET, '/api/oauth/status', oidc.getOAuthStatus);
-    apiRoute(PST, '/api/oauth/enable', oidc.enableOAuth);
-    apiRoute(PST, '/api/oauth/disable', oidc.disableOAuth);
-    apiRoute(GET, '/api/oidc/verify', oidc.verifySubId);
-    apiRoute(GET, '/api/oidc/authenticate', oidc.authenticateUser);
+    apiRoute(GET, '/api/oauth/status', openID.getOAuthStatus);
+    apiRoute(PST, '/api/oauth/enable', openID.enableOAuth);
+    apiRoute(PST, '/api/oauth/disable', openID.disableOAuth);
+    apiRoute(GET, '/api/oauth/authenticate', openID.authenticateUser);
 
     apiRoute(PST, '/api/totp_recovery/set', recoveryCodes.setRecoveryCodes);
     apiRoute(PST, '/api/totp_recovery/verify', recoveryCodes.veryifyRecoveryCode);

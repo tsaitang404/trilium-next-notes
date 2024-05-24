@@ -7,8 +7,6 @@ import openIDEncryptionService = require('./encryption/open_id_encryption');
 import options = require('./options');
 
 function isOpenIDEnabled() {
-    if (process.env.ENABLE_OAUTH?.toLocaleLowerCase() !== 'true') return false;
-
     try {
         return options.getOptionBool('oAuthEnabled');
     } catch (e) {
@@ -42,12 +40,6 @@ function getOAuthStatus() {
     return {success: true, message: options.getOptionBool('oAuthEnabled')};
 }
 
-async function verifySubId(req: Request, res: Response, next: NextFunction) {
-    req.oidc.fetchUserInfo().then((result) => {
-        return {success: true, result: openIDEncryptionService.verifyOpenIDSubjectIdentifier(result.sub)};
-    });
-}
-
 function authenticateUser(req: Request, res: Response, next: NextFunction) {
     if (openIDService.isSubjectIdentifierSaved()) return {success: false, message: 'User ID already saved!'};
     if (!req.oidc.user) {
@@ -66,6 +58,5 @@ export = {
     disableOAuth,
     isOpenIDEnabled,
     checkOpenIDRequirements,
-    verifySubId,
     authenticateUser,
 };

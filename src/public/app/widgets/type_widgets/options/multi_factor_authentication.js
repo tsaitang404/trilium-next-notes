@@ -8,33 +8,28 @@ import OptionsWidget from './options_widget.js';
 const TPL = `
 <div class="options-section">
     <h2 class=""><b>What is Multi-Factor Authentication?</b></h2>
-
     <div class="">
         <i>MFA description</i>
     </div>
     <br>
-
     <div>
         <h3><b>OAuth</b></h3>
         <span>This is what OAuth is</span>
-
         <div>
             <label>
             <b>Enable OAuth</b>
             </label>
             <input type="checkbox" class="oauth-enabled-checkbox" />
         </div>
-
         <div>
             <button class="authenticate-user-button" > Login to conigured OAuth service </button>
         </div>
     </div>
-
     <br>
     <h3><b>Time-based One-Time Password<b></h3>
     <div>
         <label>
-           <b>Enable TOTP</b>
+        <b>Enable TOTP</b>
         </label>
         <input type="checkbox" class="totp-enabled"  />
     </div>
@@ -42,35 +37,20 @@ const TPL = `
         <span>This is what TOTP is</span>
     </div>
     <br>
-    <div class="totp-details">
-        <div>
-            <div class="form-group">
-                <label>Authenticator Code</label>
-                <input class="authenticator-code" type="text">
-            </div>
-            <div class="options-section">
-                <label>
-                TOTP Secret
-                </label>
-                <input class="totp-secret-input form-control" disabled="true" type="text">
-                <button class="save-totp" disabled="true"> Save TOTP Secret </button>
-            </div>
-        </div>
+    <h4> Generate TOTP Secret </h4>
+    <div>
+        <span class="totp-secret" > TOTP Secret Key </span>
         <br>
-        <h4> Generate TOTP Secret </h4>
-        <div>
-            <span class="totp-secret" > TOTP Secret Key </span>
-            <br>
-            <button class="regenerate-totp" disabled="true"> Regenerate TOTP Secret </button>
-        </div>
-        <br>
-        <h4> Single Sign-on Recovery Keys </h4>
-            <div>
-            <span >Single sign-on recovery keys are used to login in the event you cannot access your Authenticator codes. Keep them somewhere safe and secure. </span>
-            <br><br>
-            <span class="alert alert-warning" role="alert" style="font-weight: bold; color: red !important;">After a recovery key is used it cannot be used again.</span>
-            <br><br>
-            <table style="border: 0px solid white">
+        <button class="regenerate-totp" disabled="true"> Regenerate TOTP Secret </button>
+    </div>
+    <br>
+    <h4> Single Sign-on Recovery Keys </h4>
+    <div>
+        <span >Single sign-on recovery keys are used to login in the event you cannot access your Authenticator codes. Keep them somewhere safe and secure. </span>
+        <br><br>
+        <span class="alert alert-warning" role="alert" style="font-weight: bold; color: red !important;">After a recovery key is used it cannot be used again.</span>
+        <br><br>
+        <table style="border: 0px solid white">
             <tbody>
                 <tr>
                     <td class="key_0">Recover Key 1</td>
@@ -93,24 +73,22 @@ const TPL = `
                     <td class="key_7">Recover Key 8</td>
                 </tr>
             </tbody>
-            </table>
-            <br>
-            <button class="generate-recovery-code" disabled="true"> Generate Recovery Keys </button>
-        </div>
+        </table>
+        <br>
+        <button class="generate-recovery-code" disabled="true"> Generate Recovery Keys </button>
     </div>
-</div>`;
+</div>
+`;
 
 export default class MultiFactorAuthenticationOptions extends OptionsWidget {
     doRender() {
         this.$widget = $(TPL);
 
-        this.$mfaHeadding = this.$widget.find('.mfa-heading');
         this.$regenerateTotpButton = this.$widget.find('.regenerate-totp');
         this.$totpDetails = this.$widget.find('.totp-details');
         this.$totpEnabled = this.$widget.find('.totp-enabled');
         this.$totpSecret = this.$widget.find('.totp-secret');
         this.$totpSecretInput = this.$widget.find('.totp-secret-input');
-        this.$saveTotpButton = this.$widget.find('.save-totp');
         this.$authenticatorCode = this.$widget.find('.authenticator-code');
         this.$generateRecoveryCodeButton = this.$widget.find('.generate-recovery-code');
         this.$oAuthEnabledCheckbox = this.$widget.find('.oauth-enabled-checkbox');
@@ -135,12 +113,8 @@ export default class MultiFactorAuthenticationOptions extends OptionsWidget {
             this.generateKey();
         });
 
-        this.$saveTotpButton.on('click', async () => {
-            this.saveTotpSecret();
-        });
-
         this.$authenticateuserButton.on('click', (async) => {
-            server.get('oidc/authenticate');
+            server.get('oauth/authenticate');
         });
 
         this.$protectedSessionTimeout = this.$widget.find('.protected-session-timeout-in-seconds');
@@ -204,7 +178,6 @@ export default class MultiFactorAuthenticationOptions extends OptionsWidget {
             if (result.success) {
                 this.$totpEnabled.prop('checked', result.message);
                 this.$totpSecretInput.prop('disabled', !result.message);
-                this.$saveTotpButton.prop('disabled', !result.message);
                 this.$totpSecret.prop('disapbled', !result.message);
                 this.$regenerateTotpButton.prop('disabled', !result.message);
                 this.$authenticatorCode.prop('disabled', !result.message);
@@ -215,38 +188,6 @@ export default class MultiFactorAuthenticationOptions extends OptionsWidget {
         });
 
         this.$protectedSessionTimeout.val(options.protectedSessionTimeout);
-    }
-
-    saveTotpSecret() {
-        const key = this.$totpSecretInput.val().trim();
-        const regex = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
-
-        if (key.length != 52) {
-            toastService.showError('Invalid Secret', 2000);
-            return;
-        }
-        if (regex.test(key)) {
-            toastService.showError('Invalid Secret', 2000);
-            return;
-        }
-
-        server
-            .post('totp/set', {
-                secret: this.$totpSecretInput.val(),
-                authenticatorCode: this.$authenticatorCode.val(),
-            })
-            .then((result) => {
-                if (result.success) {
-                    toastService.showError('TOTP Secret has been set');
-
-                    // password changed so current protected session is invalid and needs to be cleared
-                    protectedSessionHolder.resetProtectedSession();
-                } else {
-                    toastService.showError(result.message);
-                }
-            });
-
-        return false;
     }
 
     displayRecoveryKeys() {
