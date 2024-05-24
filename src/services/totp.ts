@@ -7,7 +7,7 @@ function getTotpSecret() {
 }
 
 function checkForTotSecret() {
-    if (process.env.TOTP_SECRET) return true;
+    if (process.env.TOTP_SECRET !== undefined) return true;
     else return false;
 }
 

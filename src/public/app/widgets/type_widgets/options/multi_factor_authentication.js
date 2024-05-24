@@ -22,12 +22,12 @@ const TPL = `
         <span><i>OpenID is a standardized way to let you log into websites using an account from another service, like Google, to verify your identity.</i></span>
         <div>
             <label>
-            <b>Enable OAuth</b>
+            <b>Enable OAuth/OpenID</b>
             </label>
             <input type="checkbox" class="oauth-enabled-checkbox" />
         </div>
         <div>
-            <button class="authenticate-user-button" > Login to conigured OAuth service </button>
+            <button class="authenticate-user-button" > Login to configured OAuth/OpenID service </button>
         </div>
     </div>
     <br>

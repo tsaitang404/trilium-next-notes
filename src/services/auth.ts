@@ -20,21 +20,25 @@ const noAuthentication = config.General && config.General.noAuthentication === t
 function checkAuth(req: AppRequest, res: Response, next: NextFunction) {
     if (!sqlInit.isDbInitialized()) {
         res.redirect('setup');
-    } else if (
-        !req.session.loggedIn &&
-        openID.isOpenIDEnabled() &&
-        openIdService.isSubjectIdentifierSaved() &&
-        !noAuthentication
-    ) {
-        const result = req.oidc.fetchUserInfo().then((result) => {
-            if (openIDEncryptionService.verifyOpenIDSubjectIdentifier(result.sub)) {
-                req.session.loggedIn = true;
-                next();
+    } else if (openID.isOpenIDEnabled() && openID.getOAuthStatus().message) {
+        if (openIdService.isSubjectIdentifierSaved() && req.oidc !== undefined) {
+            const result = req.oidc.fetchUserInfo().then((result) => {
+                if (openIDEncryptionService.verifyOpenIDSubjectIdentifier(result.sub)) {
+                    req.session.loggedIn = true;
+                    next();
+                } else {
+                    req.session.loggedIn = false;
+                    res.oidc.logout({});
+                }
+            });
+        } else {
+            if (req.oidc === undefined) {
+                res.redirect('http:localhost:8080/auth');
             } else {
-                req.session.loggedIn = false;
-                res.oidc.logout({});
+                console.log("Refresh?? Make sure it's valid??");
+                next();
             }
-        });
+        }
     } else if (!req.session.loggedIn && !utils.isElectron() && !noAuthentication) {
         res.redirect('login');
     } else next();

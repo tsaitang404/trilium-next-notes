@@ -42,9 +42,19 @@ function getOAuthStatus() {
 }
 
 function authenticateUser(req: Request, res: Response, next: NextFunction) {
+    // TODO: Add validity
     if (openIDService.isSubjectIdentifierSaved()) return {success: false, message: 'User ID already saved!'};
-    if (!req.oidc.user) {
-        res.redirect('/auth');
+
+    if (req.oidc !== undefined) {
+        console.log('Access token valid!');
+        console.log(req.oidc.accessToken);
+    } else {
+        console.log('Access token Invalid!');
+        res.redirect('http://localhost:8080/auth');
+        // req.oidc.accessToken.refresh().then((result) => {
+        //     console.log('Refreshed');
+        //     console.log(result);
+        // });
     }
 
     req.oidc.fetchUserInfo().then((result) => {
@@ -78,7 +88,11 @@ function generateOAuthConfig() {
         clientID: process.env.CLIENT_ID,
         issuerBaseURL: process.env.ISSUER_BASE_URL,
         secret: process.env.SECRET,
-        // scope: 'code',
+        clientSecret: process.env.SECRET,
+        // authorizationParams: {
+        //     response_type: 'code',
+        //     scope: 'openid profile email read:reports',
+        // },
         routes: authRoutes,
         idpLogout: true,
         logoutParams: logoutParams,
