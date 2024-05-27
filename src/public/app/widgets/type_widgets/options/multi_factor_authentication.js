@@ -27,7 +27,7 @@ const TPL = `
             <input type="checkbox" class="oauth-enabled-checkbox" />
         </div>
         <div>
-            <span> <b>Token status: </b></span><span class="token-status"> Needs login! </span><span><b>User status: </b></span><span class="user-status"> No user saved!</span>
+            <span> <b>Token status: </b></span><span class="token-status"> Needs login! </span><span><b> User status: </b></span><span class="user-status"> No user saved!</span>
             <br>
             <button class="oauth-login-button" onclick="location.href='/authenticate'" > Login to configured OAuth/OpenID service </button>
             <button class="save-user-button" > Save User </button>
@@ -40,6 +40,7 @@ const TPL = `
         <b>Enable TOTP</b>
         </label>
         <input type="checkbox" class="totp-enabled"  />
+        <span class="alert alert-warning" role="alert" style="font-weight: bold; color: red !important;">REQUIRES RESTART IF SECRET IS NOT ALREADY IN .env</span>
     </div>
     <div>
         <span><i>TOTP (Time-Based One-Time Password) is a security feature that generates a unique, temporary 
@@ -188,25 +189,30 @@ export default class MultiFactorAuthenticationOptions extends OptionsWidget {
     }
 
     optionsLoaded(options) {
-        server.get('oauth/validate').then((result) => {
-            this.$saveUserButton.prop('disabled', !result.success);
-
-            if (result.success) this.$tokenStatus.text('Logged in!');
-            else this.$tokenStatus.text('Not logged in!');
-        });
-        server.get('oauth/user').then((result) => {
-            if (result.success) this.$userStatus.text('User saved!');
-            else this.$userStatus.text('User not saved');
-        });
         server.get('oauth/status').then((result) => {
-            if (result.success) {
-                this.$oAuthEnabledCheckbox.prop('checked', result.message);
-                this.$oauthLoginButton.prop('disabled', !result.message);
-                this.$saveUserButton.prop('disabled', !result.message);
-            } else {
-                toastService.showError(result.message);
+            if (result.success) this.$oAuthEnabledCheckbox.prop('checked', result.message);
+
+            this.$oauthLoginButton.prop('disabled', !result.message);
+            this.$saveUserButton.prop('disabled', !result.message);
+
+            if (result.message) {
+                this.$oauthLoginButton.prop('disabled', false);
+                this.$saveUserButton.prop('disabled', false);
+                server.get('oauth/validate').then((result) => {
+                    if (result.success) {
+                        this.$tokenStatus.text('Logged in!');
+
+                        if (result.user) {
+                            this.$userStatus.text('User saved!');
+                        } else {
+                            this.$saveUserButton.prop('disabled', false);
+                            this.$userStatus.text('User not saved');
+                        }
+                    } else this.$tokenStatus.text('Not logged in!');
+                });
             }
         });
+
         server.get('totp/status').then((result) => {
             if (result.success) {
                 this.$totpEnabled.prop('checked', result.message);
@@ -219,7 +225,6 @@ export default class MultiFactorAuthenticationOptions extends OptionsWidget {
                 toastService.showError(result.message);
             }
         });
-
         this.$protectedSessionTimeout.val(options.protectedSessionTimeout);
     }
 

@@ -14,7 +14,6 @@ function isOpenIDEnabled() {
 }
 
 function checkOpenIDRequirements() {
-    if (!isOpenIDEnabled()) return false;
     if (process.env.BASE_URL === undefined) throw new OpenIDError('BASE_URL is undefined in .env!');
     if (process.env.CLIENT_ID === undefined) throw new OpenIDError('CLIENT_ID is undefined in .env!');
     if (process.env.ISSUER_BASE_URL === undefined) throw new OpenIDError('ISSUER_BASE_URL is undefined in .env!');
@@ -61,23 +60,21 @@ function authenticateUser(req: Request, res: Response, next: NextFunction) {
     }
 }
 
-function isUserSaved(req: Request, res: Response, next: NextFunction) {
-    return {success: true, message: openIDService.isSubjectIdentifierSaved()};
-}
-
 function isTokenValid(req: Request, res: Response, next: NextFunction) {
+    const userStatus = openIDService.isSubjectIdentifierSaved();
+
     if (req.oidc !== undefined) {
         const result = req.oidc
             .fetchUserInfo()
             .then((result) => {
-                return {success: true, message: 'Token is valid'};
+                return {success: true, message: 'Token is valid', user: userStatus};
             })
             .catch((result) => {
-                return {success: false, message: 'Token is not valid'};
+                return {success: false, message: 'Token is not valid', user: userStatus};
             });
         return result;
     } else {
-        return {success: false, message: 'Token not set up'};
+        return {success: false, message: 'Token not set up', user: userStatus};
     }
 }
 
@@ -127,5 +124,4 @@ export = {
     checkOpenIDRequirements,
     authenticateUser,
     isTokenValid,
-    isUserSaved,
 };
