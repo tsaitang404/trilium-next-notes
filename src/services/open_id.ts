@@ -14,6 +14,9 @@ function isOpenIDEnabled() {
 }
 
 function checkOpenIDRequirements() {
+    if (process.env.OAUTH_ENABLED === undefined) return false;
+    if (process.env.OAUTH_ENABLED.toLocaleLowerCase() !== 'true') return false;
+
     if (process.env.BASE_URL === undefined) throw new OpenIDError('BASE_URL is undefined in .env!');
     if (process.env.CLIENT_ID === undefined) throw new OpenIDError('CLIENT_ID is undefined in .env!');
     if (process.env.ISSUER_BASE_URL === undefined) throw new OpenIDError('ISSUER_BASE_URL is undefined in .env!');
