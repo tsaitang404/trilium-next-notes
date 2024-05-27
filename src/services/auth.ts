@@ -32,11 +32,7 @@ function checkAuth(req: AppRequest, res: Response, next: NextFunction) {
                 }
             });
         } else {
-            if (req.oidc === undefined) {
-                res.redirect('/authenticate');
-            } else {
-                next();
-            }
+            next();
         }
     } else if (!req.session.loggedIn && !utils.isElectron() && !noAuthentication) {
         res.redirect('login');
