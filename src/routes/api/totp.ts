@@ -7,9 +7,16 @@ function generateSecret() {
     return {success: 'true', message: speakeasy.generateSecret().base32};
 }
 
+function getTotpEnabled() {
+    if (process.env.TOTP_ENABLED === undefined) return false;
+    if (process.env.TOTP_ENABLED.toLocaleLowerCase() !== 'true') return false;
+
+    return true;
+}
+
 function getTOTPStatus() {
     const totpEnabled = options.getOptionBool('totpEnabled');
-    return {success: 'true', message: totpEnabled};
+    return {success: 'true', message: totpEnabled, enabled: getTotpEnabled()};
 }
 
 function enableTOTP() {

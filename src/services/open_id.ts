@@ -38,8 +38,15 @@ function disableOAuth() {
     return {success: true, message: 'OAuth Disabled'};
 }
 
+function getOauthEnv() {
+    if (process.env.OAUTH_ENABLED === undefined) return false;
+    if (process.env.OAUTH_ENABLED.toLocaleLowerCase() !== 'true') return false;
+
+    return true;
+}
+
 function getOAuthStatus() {
-    return {success: true, message: options.getOptionBool('oAuthEnabled')};
+    return {success: true, message: options.getOptionBool('oAuthEnabled'), enabled: getOauthEnv()};
 }
 
 function authenticateUser(req: Request, res: Response, next: NextFunction) {
