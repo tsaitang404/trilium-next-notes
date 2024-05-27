@@ -27,6 +27,8 @@ function checkOpenIDRequirements() {
 }
 
 function enableOAuth() {
+    if (!getOauthEnv()) return {success: false, message: 'OAuth Not Enabled'};
+
     options.setOption('oAuthEnabled', true);
     options.setOption('totpEnabled', false);
 

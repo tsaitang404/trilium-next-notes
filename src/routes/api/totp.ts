@@ -20,6 +20,8 @@ function getTOTPStatus() {
 }
 
 function enableTOTP() {
+    if (!getTotpEnabled()) return {success: 'false'};
+
     options.setOption('totpEnabled', true);
     options.setOption('oAuthEnabled', false);
     return {success: 'true'};
