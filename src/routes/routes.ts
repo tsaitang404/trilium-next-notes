@@ -141,6 +141,8 @@ function register(app: express.Application) {
     apiRoute(PST, '/api/oauth/enable', openID.enableOAuth);
     apiRoute(PST, '/api/oauth/disable', openID.disableOAuth);
     apiRoute(GET, '/api/oauth/authenticate', openID.authenticateUser);
+    apiRoute(GET, '/api/oauth/validate', openID.isTokenValid);
+    apiRoute(GET, '/api/oauth/user', openID.isUserSaved);
 
     apiRoute(PST, '/api/totp_recovery/set', recoveryCodes.setRecoveryCodes);
     apiRoute(PST, '/api/totp_recovery/verify', recoveryCodes.veryifyRecoveryCode);

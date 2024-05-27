@@ -33,9 +33,8 @@ function checkAuth(req: AppRequest, res: Response, next: NextFunction) {
             });
         } else {
             if (req.oidc === undefined) {
-                res.redirect('http:localhost:8080/auth');
+                res.redirect('/authenticate');
             } else {
-                console.log("Refresh?? Make sure it's valid??");
                 next();
             }
         }

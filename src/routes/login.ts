@@ -20,11 +20,9 @@ import openID = require('../services/encryption/open_id');
 const speakeasy = require('speakeasy');
 
 function loginPage(req: Request, res: Response) {
-    // if (openIDService.isOpenIDEnabled() && req.app.locals.userSubjectIdentifierSaved) res.redirect('/auth');
-    // else
     res.render('login', {
         failedAuth: false,
-        totpEnabled: optionService.getOption('totpEnabled') && totp_secret.checkForTotSecret(),
+        totpEnabled: optionService.getOptionBool('totpEnabled') && totp_secret.checkForTotSecret(),
         assetPath: assetPath,
         appPath: appPath,
     });

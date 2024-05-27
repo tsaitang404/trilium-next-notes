@@ -27,7 +27,10 @@ const TPL = `
             <input type="checkbox" class="oauth-enabled-checkbox" />
         </div>
         <div>
-            <button class="authenticate-user-button" > Login to configured OAuth/OpenID service </button>
+            <span> <b>Token status: </b></span><span class="token-status"> Needs login! </span><span><b>User status: </b></span><span class="user-status"> No user saved!</span>
+            <br>
+            <button class="oauth-login-button" onclick="location.href='/authenticate'" > Login to configured OAuth/OpenID service </button>
+            <button class="save-user-button" > Save User </button>
         </div>
     </div>
     <br>
@@ -99,7 +102,10 @@ export default class MultiFactorAuthenticationOptions extends OptionsWidget {
         this.$authenticatorCode = this.$widget.find('.authenticator-code');
         this.$generateRecoveryCodeButton = this.$widget.find('.generate-recovery-code');
         this.$oAuthEnabledCheckbox = this.$widget.find('.oauth-enabled-checkbox');
-        this.$authenticateuserButton = this.$widget.find('.authenticate-user-button');
+        this.$saveUserButton = this.$widget.find('.save-user-button');
+        this.$oauthLoginButton = this.$widget.find('.oauth-login-button');
+        this.$tokenStatus = this.$widget.find('.token-status');
+        this.$userStatus = this.$widget.find('.user-status');
         this.$recoveryKeys = [];
 
         for (let i = 0; i < 8; i++) this.$recoveryKeys.push(this.$widget.find('.key_' + i));
@@ -120,8 +126,17 @@ export default class MultiFactorAuthenticationOptions extends OptionsWidget {
             this.generateKey();
         });
 
-        this.$authenticateuserButton.on('click', (async) => {
-            server.get('oauth/authenticate');
+        this.$saveUserButton.on('click', (async) => {
+            server
+                .get('oauth/authenticate')
+                .then((result) => {
+                    console.log(result.message);
+                    toastService.showMessage(result.message);
+                })
+                .catch((result) => {
+                    console.error(result.message);
+                    toastService.showError(result.message);
+                });
         });
 
         this.$protectedSessionTimeout = this.$widget.find('.protected-session-timeout-in-seconds');
@@ -173,10 +188,21 @@ export default class MultiFactorAuthenticationOptions extends OptionsWidget {
     }
 
     optionsLoaded(options) {
+        server.get('oauth/validate').then((result) => {
+            this.$saveUserButton.prop('disabled', !result.success);
+
+            if (result.success) this.$tokenStatus.text('Logged in!');
+            else this.$tokenStatus.text('Not logged in!');
+        });
+        server.get('oauth/user').then((result) => {
+            if (result.success) this.$userStatus.text('User saved!');
+            else this.$userStatus.text('User not saved');
+        });
         server.get('oauth/status').then((result) => {
             if (result.success) {
                 this.$oAuthEnabledCheckbox.prop('checked', result.message);
-                this.$authenticateuserButton.prop('disabled', !result.message);
+                this.$oauthLoginButton.prop('disabled', !result.message);
+                this.$saveUserButton.prop('disabled', !result.message);
             } else {
                 toastService.showError(result.message);
             }

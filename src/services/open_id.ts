@@ -3,7 +3,6 @@
 import OpenIDError = require('../errors/open_id_error');
 import {NextFunction, Request, Response} from 'express';
 import openIDService = require('./encryption/open_id');
-import openIDEncryptionService = require('./encryption/open_id_encryption');
 import options = require('./options');
 
 function isOpenIDEnabled() {
@@ -46,21 +45,40 @@ function authenticateUser(req: Request, res: Response, next: NextFunction) {
     if (openIDService.isSubjectIdentifierSaved()) return {success: false, message: 'User ID already saved!'};
 
     if (req.oidc !== undefined) {
-        console.log('Access token valid!');
-        console.log(req.oidc.accessToken);
+        const result = req.oidc
+            .fetchUserInfo()
+            .then((result) => {
+                openIDService.saveSubjectIdentifier(result.sub);
+                return {success: true, message: 'User ' + req.oidc.user?.name + ' saved!'};
+            })
+            .catch((result) => {
+                return {success: false, message: 'Need to login again!'};
+            });
+        return result;
     } else {
         console.log('Access token Invalid!');
-        res.redirect('http://localhost:8080/auth');
-        // req.oidc.accessToken.refresh().then((result) => {
-        //     console.log('Refreshed');
-        //     console.log(result);
-        // });
+        return {success: false, message: 'Access token Invalid!'};
     }
+}
 
-    req.oidc.fetchUserInfo().then((result) => {
-        openIDService.saveSubjectIdentifier(result.sub);
-    });
-    return {success: true, message: 'User ' + req.oidc.user?.sub + ' saved!'};
+function isUserSaved(req: Request, res: Response, next: NextFunction) {
+    return {success: true, message: openIDService.isSubjectIdentifierSaved()};
+}
+
+function isTokenValid(req: Request, res: Response, next: NextFunction) {
+    if (req.oidc !== undefined) {
+        const result = req.oidc
+            .fetchUserInfo()
+            .then((result) => {
+                return {success: true, message: 'Token is valid'};
+            })
+            .catch((result) => {
+                return {success: false, message: 'Token is not valid'};
+            });
+        return result;
+    } else {
+        return {success: false, message: 'Token not set up'};
+    }
 }
 
 function checkAuth0Logout() {
@@ -72,7 +90,7 @@ function checkAuth0Logout() {
 function generateOAuthConfig() {
     const authRoutes = {
         callback: '/callback',
-        login: '/auth',
+        login: '/authenticate',
         postLogoutRedirect: '/login',
         logout: '/logout',
     };
@@ -108,4 +126,6 @@ export = {
     isOpenIDEnabled,
     checkOpenIDRequirements,
     authenticateUser,
+    isTokenValid,
+    isUserSaved,
 };
