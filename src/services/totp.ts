@@ -1,5 +1,3 @@
-/** @format */
-
 'use strict';
 
 function getTotpSecret() {

@@ -1,5 +1,3 @@
-/** @format */
-
 import options = require('../../services/options');
 const speakeasy = require('speakeasy');
 

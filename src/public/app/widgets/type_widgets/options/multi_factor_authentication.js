@@ -1,5 +1,3 @@
-/** @format */
-
 import server from '../../../services/server.js';
 import toastService from '../../../services/toast.js';
 import OptionsWidget from './options_widget.js';

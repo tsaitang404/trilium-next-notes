@@ -1,12 +1,10 @@
-/** @format */
-
 import optionService = require('./options');
 import appInfo = require('./app_info');
 import utils = require('./utils');
 import log = require('./log');
 import dateUtils = require('./date_utils');
 import keyboardActions = require('./keyboard_actions');
-import {KeyboardShortcutWithRequiredActionName} from './keyboard_actions_interface';
+import { KeyboardShortcutWithRequiredActionName } from './keyboard_actions_interface';
 
 function initDocumentOptions() {
     optionService.createOption('documentId', utils.randomSecureToken(16), false);
@@ -19,16 +17,12 @@ interface NotSyncedOpts {
 }
 
 function initNotSyncedOptions(initialized: boolean, opts: NotSyncedOpts = {}) {
-    optionService.createOption(
-        'openNoteContexts',
-        JSON.stringify([
-            {
-                notePath: 'root',
-                active: true,
-            },
-        ]),
-        false
-    );
+    optionService.createOption('openNoteContexts', JSON.stringify([
+        {
+            notePath: 'root',
+            active: true
+        }
+    ]), false);
 
     optionService.createOption('lastDailyBackupDate', dateUtils.utcNowDateTime(), false);
     optionService.createOption('lastWeeklyBackupDate', dateUtils.utcNowDateTime(), false);
@@ -56,61 +50,57 @@ function initNotSyncedOptions(initialized: boolean, opts: NotSyncedOpts = {}) {
 }
 
 const defaultOptions = [
-    {name: 'revisionSnapshotTimeInterval', value: '600', isSynced: true},
-    {name: 'protectedSessionTimeout', value: '600', isSynced: true},
-    {name: 'zoomFactor', value: process.platform === 'win32' ? '0.9' : '1.0', isSynced: false},
-    {name: 'overrideThemeFonts', value: 'false', isSynced: false},
-    {name: 'mainFontFamily', value: 'theme', isSynced: false},
-    {name: 'mainFontSize', value: '100', isSynced: false},
-    {name: 'treeFontFamily', value: 'theme', isSynced: false},
-    {name: 'treeFontSize', value: '100', isSynced: false},
-    {name: 'detailFontFamily', value: 'theme', isSynced: false},
-    {name: 'detailFontSize', value: '110', isSynced: false},
-    {name: 'monospaceFontFamily', value: 'theme', isSynced: false},
-    {name: 'monospaceFontSize', value: '110', isSynced: false},
-    {name: 'spellCheckEnabled', value: 'true', isSynced: false},
-    {name: 'spellCheckLanguageCode', value: 'en-US', isSynced: false},
-    {name: 'imageMaxWidthHeight', value: '2000', isSynced: true},
-    {name: 'imageJpegQuality', value: '75', isSynced: true},
-    {name: 'autoFixConsistencyIssues', value: 'true', isSynced: false},
-    {name: 'vimKeymapEnabled', value: 'false', isSynced: false},
-    {name: 'codeLineWrapEnabled', value: 'true', isSynced: false},
-    {
-        name: 'codeNotesMimeTypes',
-        value: '["text/x-csrc","text/x-c++src","text/x-csharp","text/css","text/x-go","text/x-groovy","text/x-haskell","text/html","message/http","text/x-java","application/javascript;env=frontend","application/javascript;env=backend","application/json","text/x-kotlin","text/x-markdown","text/x-perl","text/x-php","text/x-python","text/x-ruby",null,"text/x-sql","text/x-sqlite;schema=trilium","text/x-swift","text/xml","text/x-yaml","text/x-sh"]',
-        isSynced: true,
-    },
-    {name: 'leftPaneWidth', value: '25', isSynced: false},
-    {name: 'leftPaneVisible', value: 'true', isSynced: false},
-    {name: 'rightPaneWidth', value: '25', isSynced: false},
-    {name: 'rightPaneVisible', value: 'true', isSynced: false},
-    {name: 'nativeTitleBarVisible', value: 'false', isSynced: false},
-    {name: 'eraseEntitiesAfterTimeInSeconds', value: '604800', isSynced: true}, // default is 7 days
-    {name: 'hideArchivedNotes_main', value: 'false', isSynced: false},
-    {name: 'debugModeEnabled', value: 'false', isSynced: false},
-    {name: 'headingStyle', value: 'underline', isSynced: true},
-    {name: 'autoCollapseNoteTree', value: 'true', isSynced: true},
-    {name: 'autoReadonlySizeText', value: '10000', isSynced: false},
-    {name: 'autoReadonlySizeCode', value: '30000', isSynced: false},
-    {name: 'dailyBackupEnabled', value: 'true', isSynced: false},
-    {name: 'weeklyBackupEnabled', value: 'true', isSynced: false},
-    {name: 'monthlyBackupEnabled', value: 'true', isSynced: false},
-    {name: 'maxContentWidth', value: '1200', isSynced: false},
-    {name: 'compressImages', value: 'true', isSynced: true},
-    {name: 'downloadImagesAutomatically', value: 'true', isSynced: true},
-    {name: 'minTocHeadings', value: '5', isSynced: true},
-    {name: 'highlightsList', value: '["bold","italic","underline","color","bgColor"]', isSynced: true},
-    {name: 'checkForUpdates', value: 'true', isSynced: true},
-    {name: 'disableTray', value: 'false', isSynced: false},
-    {name: 'eraseUnusedAttachmentsAfterSeconds', value: '2592000', isSynced: true},
-    {name: 'customSearchEngineName', value: 'DuckDuckGo', isSynced: true},
-    {name: 'customSearchEngineUrl', value: 'https://duckduckgo.com/?q={keyword}', isSynced: true},
-    {name: 'promotedAttributesOpenInRibbon', value: 'true', isSynced: true},
-    {name: 'editedNotesOpenInRibbon', value: 'true', isSynced: true},
-    {name: 'totpEnabled', value: 'false', isSynced: true},
-    {name: 'encryptedRecoveryCodes', value: 'false', isSynced: true},
-    {name: 'userSubjectIdentifierSaved', value: 'false', isSynced: true},
-    {name: 'oAuthEnabled', value: 'false', isSynced: true},
+    { name: 'revisionSnapshotTimeInterval', value: '600', isSynced: true },
+    { name: 'protectedSessionTimeout', value: '600', isSynced: true },
+    { name: 'zoomFactor', value: process.platform === "win32" ? '0.9' : '1.0', isSynced: false },
+    { name: 'overrideThemeFonts', value: 'false', isSynced: false },
+    { name: 'mainFontFamily', value: 'theme', isSynced: false },
+    { name: 'mainFontSize', value: '100', isSynced: false },
+    { name: 'treeFontFamily', value: 'theme', isSynced: false },
+    { name: 'treeFontSize', value: '100', isSynced: false },
+    { name: 'detailFontFamily', value: 'theme', isSynced: false },
+    { name: 'detailFontSize', value: '110', isSynced: false },
+    { name: 'monospaceFontFamily', value: 'theme', isSynced: false },
+    { name: 'monospaceFontSize', value: '110', isSynced: false },
+    { name: 'spellCheckEnabled', value: 'true', isSynced: false },
+    { name: 'spellCheckLanguageCode', value: 'en-US', isSynced: false },
+    { name: 'imageMaxWidthHeight', value: '2000', isSynced: true },
+    { name: 'imageJpegQuality', value: '75', isSynced: true },
+    { name: 'autoFixConsistencyIssues', value: 'true', isSynced: false },
+    { name: 'vimKeymapEnabled', value: 'false', isSynced: false },
+    { name: 'codeLineWrapEnabled', value: 'true', isSynced: false },
+    { name: 'codeNotesMimeTypes', value: '["text/x-csrc","text/x-c++src","text/x-csharp","text/css","text/x-go","text/x-groovy","text/x-haskell","text/html","message/http","text/x-java","application/javascript;env=frontend","application/javascript;env=backend","application/json","text/x-kotlin","text/x-markdown","text/x-perl","text/x-php","text/x-python","text/x-ruby",null,"text/x-sql","text/x-sqlite;schema=trilium","text/x-swift","text/xml","text/x-yaml","text/x-sh"]', isSynced: true },
+    { name: 'leftPaneWidth', value: '25', isSynced: false },
+    { name: 'leftPaneVisible', value: 'true', isSynced: false },
+    { name: 'rightPaneWidth', value: '25', isSynced: false },
+    { name: 'rightPaneVisible', value: 'true', isSynced: false },
+    { name: 'nativeTitleBarVisible', value: 'false', isSynced: false },
+    { name: 'eraseEntitiesAfterTimeInSeconds', value: '604800', isSynced: true }, // default is 7 days
+    { name: 'hideArchivedNotes_main', value: 'false', isSynced: false },
+    { name: 'debugModeEnabled', value: 'false', isSynced: false },
+    { name: 'headingStyle', value: 'underline', isSynced: true },
+    { name: 'autoCollapseNoteTree', value: 'true', isSynced: true },
+    { name: 'autoReadonlySizeText', value: '10000', isSynced: false },
+    { name: 'autoReadonlySizeCode', value: '30000', isSynced: false },
+    { name: 'dailyBackupEnabled', value: 'true', isSynced: false },
+    { name: 'weeklyBackupEnabled', value: 'true', isSynced: false },
+    { name: 'monthlyBackupEnabled', value: 'true', isSynced: false },
+    { name: 'maxContentWidth', value: '1200', isSynced: false },
+    { name: 'compressImages', value: 'true', isSynced: true },
+    { name: 'downloadImagesAutomatically', value: 'true', isSynced: true },
+    { name: 'minTocHeadings', value: '5', isSynced: true },
+    { name: 'highlightsList', value: '["bold","italic","underline","color","bgColor"]', isSynced: true },
+    { name: 'checkForUpdates', value: 'true', isSynced: true },
+    { name: 'disableTray', value: 'false', isSynced: false },
+    { name: 'eraseUnusedAttachmentsAfterSeconds', value: '2592000', isSynced: true },
+    { name: 'customSearchEngineName', value: 'DuckDuckGo', isSynced: true },
+    { name: 'customSearchEngineUrl', value: 'https://duckduckgo.com/?q={keyword}', isSynced: true },
+    { name: 'promotedAttributesOpenInRibbon', value: 'true', isSynced: true },
+    { name: 'editedNotesOpenInRibbon', value: 'true', isSynced: true },
+    { name: 'totpEnabled', value: 'false', isSynced: true},
+    { name: 'encryptedRecoveryCodes', value: 'false', isSynced: true},
+    { name: 'userSubjectIdentifierSaved', value: 'false', isSynced: true},
+    { name: 'oAuthEnabled', value: 'false', isSynced: true},
 ];
 
 function initStartupOptions() {
@@ -127,32 +117,27 @@ function initStartupOptions() {
     }
 
     if (process.env.TRILIUM_START_NOTE_ID || process.env.TRILIUM_SAFE_MODE) {
-        optionService.setOption(
-            'openNoteContexts',
-            JSON.stringify([
-                {
-                    notePath: process.env.TRILIUM_START_NOTE_ID || 'root',
-                    active: true,
-                },
-            ])
-        );
+        optionService.setOption('openNoteContexts', JSON.stringify([
+            {
+                notePath: process.env.TRILIUM_START_NOTE_ID || 'root',
+                active: true
+            }
+        ]));
     }
 }
 
 function getKeyboardDefaultOptions() {
-    return (
-        keyboardActions.DEFAULT_KEYBOARD_ACTIONS.filter(
-            (ka) => !!ka.actionName
-        ) as KeyboardShortcutWithRequiredActionName[]
-    ).map((ka) => ({
-        name: `keyboardShortcuts${ka.actionName.charAt(0).toUpperCase()}${ka.actionName.slice(1)}`,
-        value: JSON.stringify(ka.defaultShortcuts),
-        isSynced: false,
-    }));
+    return (keyboardActions.DEFAULT_KEYBOARD_ACTIONS
+        .filter(ka => !!ka.actionName) as KeyboardShortcutWithRequiredActionName[])
+        .map(ka => ({
+            name: `keyboardShortcuts${ka.actionName.charAt(0).toUpperCase()}${ka.actionName.slice(1)}`,
+            value: JSON.stringify(ka.defaultShortcuts),
+            isSynced: false
+        }));
 }
 
 export = {
     initDocumentOptions,
     initNotSyncedOptions,
-    initStartupOptions,
+    initStartupOptions
 };

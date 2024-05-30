@@ -21,6 +21,7 @@ function getOption(name: string) {
     if (val === null) {
         throw new Error(`Option '${name}' doesn't exist`);
     }
+
     return val;
 }
 

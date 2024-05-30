@@ -1,5 +1,3 @@
-/** @format */
-
 class OpenIDError {
     message: string;
 

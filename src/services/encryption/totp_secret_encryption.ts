@@ -22,7 +22,6 @@ function getDataKey(secret: string) {
 }
 
 export = {
-    //   verifyPassword,
     getDataKey,
     setDataKey
 };

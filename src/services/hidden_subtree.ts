@@ -1,27 +1,25 @@
-/** @format */
-
-import BAttribute = require('../becca/entities/battribute');
-import {AttributeType, NoteType} from '../becca/entities/rows';
+import BAttribute = require("../becca/entities/battribute");
+import { AttributeType, NoteType } from "../becca/entities/rows";
 
 import becca = require('../becca/becca');
 import noteService = require('./notes');
 import log = require('./log');
 import migrationService = require('./migration');
 
-const LBTPL_ROOT = '_lbTplRoot';
-const LBTPL_BASE = '_lbTplBase';
-const LBTPL_COMMAND = '_lbTplCommandLauncher';
-const LBTPL_NOTE_LAUNCHER = '_lbTplNoteLauncher';
-const LBTPL_SCRIPT = '_lbTplScriptLauncher';
-const LBTPL_BUILTIN_WIDGET = '_lbTplBuiltinWidget';
-const LBTPL_SPACER = '_lbTplSpacer';
-const LBTPL_CUSTOM_WIDGET = '_lbTplCustomWidget';
+const LBTPL_ROOT = "_lbTplRoot";
+const LBTPL_BASE = "_lbTplBase";
+const LBTPL_COMMAND = "_lbTplCommandLauncher";
+const LBTPL_NOTE_LAUNCHER = "_lbTplNoteLauncher";
+const LBTPL_SCRIPT = "_lbTplScriptLauncher";
+const LBTPL_BUILTIN_WIDGET = "_lbTplBuiltinWidget";
+const LBTPL_SPACER = "_lbTplSpacer";
+const LBTPL_CUSTOM_WIDGET = "_lbTplCustomWidget";
 
 interface Attribute {
     type: AttributeType;
     name: string;
     isInheritable?: boolean;
-    value?: string;
+    value?: string
 }
 
 interface Item {
@@ -35,17 +33,9 @@ interface Item {
     isExpanded?: boolean;
     baseSize?: string;
     growthFactor?: string;
-    targetNoteId?: '_backendLog' | '_globalNoteMap';
-    builtinWidget?:
-        | 'bookmarks'
-        | 'spacer'
-        | 'backInHistoryButton'
-        | 'forwardInHistoryButton'
-        | 'syncStatus'
-        | 'protectedSession'
-        | 'todayInJournal'
-        | 'calendar';
-    command?: 'jumpToNote' | 'searchNotes' | 'createNoteIntoInbox' | 'showRecentChanges';
+    targetNoteId?: "_backendLog" | "_globalNoteMap";
+    builtinWidget?: "bookmarks" | "spacer" | "backInHistoryButton" | "forwardInHistoryButton" | "syncStatus" | "protectedSession" | "todayInJournal" | "calendar";
+    command?: "jumpToNote" | "searchNotes" | "createNoteIntoInbox" | "showRecentChanges";
 }
 
 /*
@@ -63,35 +53,35 @@ const HIDDEN_SUBTREE_DEFINITION: Item = {
     // over tree when it's in the middle
     notePosition: 999_999_999,
     attributes: [
-        {type: 'label', name: 'excludeFromNoteMap', isInheritable: true},
-        {type: 'label', name: 'docName', value: 'hidden'},
+        { type: 'label', name: 'excludeFromNoteMap', isInheritable: true },
+        { type: 'label', name: 'docName', value: 'hidden' }
     ],
     children: [
         {
             id: '_search',
             title: 'Search History',
-            type: 'doc',
+            type: 'doc'
         },
         {
             id: '_globalNoteMap',
             title: 'Note Map',
             type: 'noteMap',
             attributes: [
-                {type: 'label', name: 'mapRootNoteId', value: 'hoisted'},
-                {type: 'label', name: 'keepCurrentHoisting'},
-            ],
+                { type: 'label', name: 'mapRootNoteId', value: 'hoisted' },
+                { type: 'label', name: 'keepCurrentHoisting' }
+            ]
         },
         {
             id: '_sqlConsole',
             title: 'SQL Console History',
             type: 'doc',
-            icon: 'bx-data',
+            icon: 'bx-data'
         },
         {
             id: '_share',
             title: 'Shared Notes',
             type: 'doc',
-            attributes: [{type: 'label', name: 'docName', value: 'share'}],
+            attributes: [ { type: 'label', name: 'docName', value: 'share' } ]
         },
         {
             id: '_bulkAction',
@@ -103,14 +93,16 @@ const HIDDEN_SUBTREE_DEFINITION: Item = {
             title: 'Backend Log',
             type: 'contentWidget',
             icon: 'bx-terminal',
-            attributes: [{type: 'label', name: 'keepCurrentHoisting'}],
+            attributes: [
+                { type: 'label', name: 'keepCurrentHoisting' }
+            ]
         },
         {
             // place for user scripts hidden stuff (scripts should not create notes directly under hidden root)
             id: '_userHidden',
             title: 'User Hidden',
             type: 'doc',
-            attributes: [{type: 'label', name: 'docName', value: 'user_hidden'}],
+            attributes: [ { type: 'label', name: 'docName', value: 'user_hidden' } ]
         },
         {
             id: LBTPL_ROOT,
@@ -120,51 +112,51 @@ const HIDDEN_SUBTREE_DEFINITION: Item = {
                 {
                     id: LBTPL_BASE,
                     title: 'Base Abstract Launcher',
-                    type: 'doc',
+                    type: 'doc'
                 },
                 {
                     id: LBTPL_COMMAND,
                     title: 'Command Launcher',
                     type: 'doc',
                     attributes: [
-                        {type: 'relation', name: 'template', value: LBTPL_BASE},
-                        {type: 'label', name: 'launcherType', value: 'command'},
-                        {type: 'label', name: 'docName', value: 'launchbar_command_launcher'},
-                    ],
+                        { type: 'relation', name: 'template', value: LBTPL_BASE },
+                        { type: 'label', name: 'launcherType', value: 'command' },
+                        { type: 'label', name: 'docName', value: 'launchbar_command_launcher' }
+                    ]
                 },
                 {
                     id: LBTPL_NOTE_LAUNCHER,
                     title: 'Note Launcher',
                     type: 'doc',
                     attributes: [
-                        {type: 'relation', name: 'template', value: LBTPL_BASE},
-                        {type: 'label', name: 'launcherType', value: 'note'},
-                        {type: 'label', name: 'relation:target', value: 'promoted'},
-                        {type: 'label', name: 'relation:hoistedNote', value: 'promoted'},
-                        {type: 'label', name: 'label:keyboardShortcut', value: 'promoted,text'},
-                        {type: 'label', name: 'docName', value: 'launchbar_note_launcher'},
-                    ],
+                        { type: 'relation', name: 'template', value: LBTPL_BASE },
+                        { type: 'label', name: 'launcherType', value: 'note' },
+                        { type: 'label', name: 'relation:target', value: 'promoted' },
+                        { type: 'label', name: 'relation:hoistedNote', value: 'promoted' },
+                        { type: 'label', name: 'label:keyboardShortcut', value: 'promoted,text' },
+                        { type: 'label', name: 'docName', value: 'launchbar_note_launcher' }
+                    ]
                 },
                 {
                     id: LBTPL_SCRIPT,
                     title: 'Script Launcher',
                     type: 'doc',
                     attributes: [
-                        {type: 'relation', name: 'template', value: LBTPL_BASE},
-                        {type: 'label', name: 'launcherType', value: 'script'},
-                        {type: 'label', name: 'relation:script', value: 'promoted'},
-                        {type: 'label', name: 'label:keyboardShortcut', value: 'promoted,text'},
-                        {type: 'label', name: 'docName', value: 'launchbar_script_launcher'},
-                    ],
+                        { type: 'relation', name: 'template', value: LBTPL_BASE },
+                        { type: 'label', name: 'launcherType', value: 'script' },
+                        { type: 'label', name: 'relation:script', value: 'promoted' },
+                        { type: 'label', name: 'label:keyboardShortcut', value: 'promoted,text' },
+                        { type: 'label', name: 'docName', value: 'launchbar_script_launcher' }
+                    ]
                 },
                 {
                     id: LBTPL_BUILTIN_WIDGET,
                     title: 'Built-in Widget',
                     type: 'doc',
                     attributes: [
-                        {type: 'relation', name: 'template', value: LBTPL_BASE},
-                        {type: 'label', name: 'launcherType', value: 'builtinWidget'},
-                    ],
+                        { type: 'relation', name: 'template', value: LBTPL_BASE },
+                        { type: 'label', name: 'launcherType', value: 'builtinWidget' }
+                    ]
                 },
                 {
                     id: LBTPL_SPACER,
@@ -172,25 +164,25 @@ const HIDDEN_SUBTREE_DEFINITION: Item = {
                     type: 'doc',
                     icon: 'bx-move-vertical',
                     attributes: [
-                        {type: 'relation', name: 'template', value: LBTPL_BUILTIN_WIDGET},
-                        {type: 'label', name: 'builtinWidget', value: 'spacer'},
-                        {type: 'label', name: 'label:baseSize', value: 'promoted,number'},
-                        {type: 'label', name: 'label:growthFactor', value: 'promoted,number'},
-                        {type: 'label', name: 'docName', value: 'launchbar_spacer'},
-                    ],
+                        { type: 'relation', name: 'template', value: LBTPL_BUILTIN_WIDGET },
+                        { type: 'label', name: 'builtinWidget', value: 'spacer' },
+                        { type: 'label', name: 'label:baseSize', value: 'promoted,number' },
+                        { type: 'label', name: 'label:growthFactor', value: 'promoted,number' },
+                        { type: 'label', name: 'docName', value: 'launchbar_spacer' }
+                    ]
                 },
                 {
                     id: LBTPL_CUSTOM_WIDGET,
                     title: 'Custom Widget',
                     type: 'doc',
                     attributes: [
-                        {type: 'relation', name: 'template', value: LBTPL_BASE},
-                        {type: 'label', name: 'launcherType', value: 'customWidget'},
-                        {type: 'label', name: 'relation:widget', value: 'promoted'},
-                        {type: 'label', name: 'docName', value: 'launchbar_widget_launcher'},
-                    ],
+                        { type: 'relation', name: 'template', value: LBTPL_BASE },
+                        { type: 'label', name: 'launcherType', value: 'customWidget' },
+                        { type: 'label', name: 'relation:widget', value: 'promoted' },
+                        { type: 'label', name: 'docName', value: 'launchbar_widget_launcher' }
+                    ]
                 },
-            ],
+            ]
         },
         {
             id: '_lbRoot',
@@ -198,7 +190,7 @@ const HIDDEN_SUBTREE_DEFINITION: Item = {
             type: 'doc',
             icon: 'bx-sidebar',
             isExpanded: true,
-            attributes: [{type: 'label', name: 'docName', value: 'launchbar_intro'}],
+            attributes: [ { type: 'label', name: 'docName', value: 'launchbar_intro' } ],
             children: [
                 {
                     id: '_lbAvailableLaunchers',
@@ -206,32 +198,14 @@ const HIDDEN_SUBTREE_DEFINITION: Item = {
                     type: 'doc',
                     icon: 'bx-hide',
                     isExpanded: true,
-                    attributes: [{type: 'label', name: 'docName', value: 'launchbar_intro'}],
+                    attributes: [ { type: 'label', name: 'docName', value: 'launchbar_intro' } ],
                     children: [
-                        {
-                            id: '_lbBackInHistory',
-                            title: 'Go to Previous Note',
-                            type: 'launcher',
-                            builtinWidget: 'backInHistoryButton',
-                            icon: 'bx bxs-left-arrow-square',
-                            attributes: [{type: 'label', name: 'docName', value: 'launchbar_history_navigation'}],
-                        },
-                        {
-                            id: '_lbForwardInHistory',
-                            title: 'Go to Next Note',
-                            type: 'launcher',
-                            builtinWidget: 'forwardInHistoryButton',
-                            icon: 'bx bxs-right-arrow-square',
-                            attributes: [{type: 'label', name: 'docName', value: 'launchbar_history_navigation'}],
-                        },
-                        {
-                            id: '_lbBackendLog',
-                            title: 'Backend Log',
-                            type: 'launcher',
-                            targetNoteId: '_backendLog',
-                            icon: 'bx bx-terminal',
-                        },
-                    ],
+                        { id: '_lbBackInHistory', title: 'Go to Previous Note', type: 'launcher', builtinWidget: 'backInHistoryButton', icon: 'bx bxs-left-arrow-square',
+                            attributes: [ { type: 'label', name: 'docName', value: 'launchbar_history_navigation' } ]},
+                        { id: '_lbForwardInHistory', title: 'Go to Next Note', type: 'launcher', builtinWidget: 'forwardInHistoryButton', icon: 'bx bxs-right-arrow-square',
+                            attributes: [ { type: 'label', name: 'docName', value: 'launchbar_history_navigation' } ]},
+                        { id: '_lbBackendLog', title: 'Backend Log', type: 'launcher', targetNoteId: '_backendLog', icon: 'bx bx-terminal' },
+                    ]
                 },
                 {
                     id: '_lbVisibleLaunchers',
@@ -239,128 +213,57 @@ const HIDDEN_SUBTREE_DEFINITION: Item = {
                     type: 'doc',
                     icon: 'bx-show',
                     isExpanded: true,
-                    attributes: [{type: 'label', name: 'docName', value: 'launchbar_intro'}],
+                    attributes: [ { type: 'label', name: 'docName', value: 'launchbar_intro' } ],
                     children: [
-                        {
-                            id: '_lbNewNote',
-                            title: 'New Note',
-                            type: 'launcher',
-                            command: 'createNoteIntoInbox',
-                            icon: 'bx bx-file-blank',
-                        },
-                        {
-                            id: '_lbSearch',
-                            title: 'Search Notes',
-                            type: 'launcher',
-                            command: 'searchNotes',
-                            icon: 'bx bx-search',
-                            attributes: [{type: 'label', name: 'desktopOnly'}],
-                        },
-                        {
-                            id: '_lbJumpTo',
-                            title: 'Jump to Note',
-                            type: 'launcher',
-                            command: 'jumpToNote',
-                            icon: 'bx bx-send',
-                            attributes: [{type: 'label', name: 'desktopOnly'}],
-                        },
-                        {
-                            id: '_lbNoteMap',
-                            title: 'Note Map',
-                            type: 'launcher',
-                            targetNoteId: '_globalNoteMap',
-                            icon: 'bx bx-map-alt',
-                        },
-                        {
-                            id: '_lbCalendar',
-                            title: 'Calendar',
-                            type: 'launcher',
-                            builtinWidget: 'calendar',
-                            icon: 'bx bx-calendar',
-                        },
-                        {
-                            id: '_lbRecentChanges',
-                            title: 'Recent Changes',
-                            type: 'launcher',
-                            command: 'showRecentChanges',
-                            icon: 'bx bx-history',
-                            attributes: [{type: 'label', name: 'desktopOnly'}],
-                        },
-                        {
-                            id: '_lbSpacer1',
-                            title: 'Spacer',
-                            type: 'launcher',
-                            builtinWidget: 'spacer',
-                            baseSize: '50',
-                            growthFactor: '0',
-                        },
-                        {
-                            id: '_lbBookmarks',
-                            title: 'Bookmarks',
-                            type: 'launcher',
-                            builtinWidget: 'bookmarks',
-                            icon: 'bx bx-bookmark',
-                        },
-                        {
-                            id: '_lbToday',
-                            title: "Open Today's Journal Note",
-                            type: 'launcher',
-                            builtinWidget: 'todayInJournal',
-                            icon: 'bx bx-calendar-star',
-                        },
-                        {
-                            id: '_lbSpacer2',
-                            title: 'Spacer',
-                            type: 'launcher',
-                            builtinWidget: 'spacer',
-                            baseSize: '0',
-                            growthFactor: '1',
-                        },
-                        {
-                            id: '_lbProtectedSession',
-                            title: 'Protected Session',
-                            type: 'launcher',
-                            builtinWidget: 'protectedSession',
-                            icon: 'bx bx bx-shield-quarter',
-                        },
-                        {
-                            id: '_lbSyncStatus',
-                            title: 'Sync Status',
-                            type: 'launcher',
-                            builtinWidget: 'syncStatus',
-                            icon: 'bx bx-wifi',
-                        },
-                    ],
-                },
-            ],
+                        { id: '_lbNewNote', title: 'New Note', type: 'launcher', command: 'createNoteIntoInbox', icon: 'bx bx-file-blank' },
+                        { id: '_lbSearch', title: 'Search Notes', type: 'launcher', command: 'searchNotes', icon: 'bx bx-search', attributes: [
+                                { type: 'label', name: 'desktopOnly' }
+                            ] },
+                        { id: '_lbJumpTo', title: 'Jump to Note', type: 'launcher', command: 'jumpToNote', icon: 'bx bx-send', attributes: [
+                                { type: 'label', name: 'desktopOnly' }
+                            ] },
+                        { id: '_lbNoteMap', title: 'Note Map', type: 'launcher', targetNoteId: '_globalNoteMap', icon: 'bx bx-map-alt' },
+                        { id: '_lbCalendar', title: 'Calendar', type: 'launcher', builtinWidget: 'calendar', icon: 'bx bx-calendar' },
+                        { id: '_lbRecentChanges', title: 'Recent Changes', type: 'launcher', command: 'showRecentChanges', icon: 'bx bx-history', attributes: [
+                                { type: 'label', name: 'desktopOnly' }
+                            ] },
+                        { id: '_lbSpacer1', title: 'Spacer', type: 'launcher', builtinWidget: 'spacer', baseSize: "50", growthFactor: "0" },
+                        { id: '_lbBookmarks', title: 'Bookmarks', type: 'launcher', builtinWidget: 'bookmarks', icon: 'bx bx-bookmark' },
+                        { id: '_lbToday', title: "Open Today's Journal Note", type: 'launcher', builtinWidget: 'todayInJournal', icon: 'bx bx-calendar-star' },
+                        { id: '_lbSpacer2', title: 'Spacer', type: 'launcher', builtinWidget: 'spacer', baseSize: "0", growthFactor: "1" },
+                        { id: '_lbProtectedSession', title: 'Protected Session', type: 'launcher', builtinWidget: 'protectedSession', icon: 'bx bx bx-shield-quarter' },
+                        { id: '_lbSyncStatus', title: 'Sync Status', type: 'launcher', builtinWidget: 'syncStatus', icon: 'bx bx-wifi' }
+                    ]
+                }
+            ]
         },
         {
             id: '_options',
             title: 'Options',
             type: 'book',
             children: [
-                {id: '_optionsAppearance', title: 'Appearance', type: 'contentWidget', icon: 'bx-layout'},
-                {id: '_optionsShortcuts', title: 'Shortcuts', type: 'contentWidget', icon: 'bxs-keyboard'},
-                {id: '_optionsTextNotes', title: 'Text Notes', type: 'contentWidget', icon: 'bx-text'},
-                {id: '_optionsMFA', title: 'MFA', type: 'contentWidget', icon: 'bx-lock'},
-                {id: '_optionsCodeNotes', title: 'Code Notes', type: 'contentWidget', icon: 'bx-code'},
-                {id: '_optionsImages', title: 'Images', type: 'contentWidget', icon: 'bx-image'},
-                {id: '_optionsSpellcheck', title: 'Spellcheck', type: 'contentWidget', icon: 'bx-check-double'},
-                {id: '_optionsPassword', title: 'Password', type: 'contentWidget', icon: 'bx-lock'},
-                {id: '_optionsEtapi', title: 'ETAPI', type: 'contentWidget', icon: 'bx-extension'},
-                {id: '_optionsBackup', title: 'Backup', type: 'contentWidget', icon: 'bx-data'},
-                {id: '_optionsSync', title: 'Sync', type: 'contentWidget', icon: 'bx-wifi'},
-                {id: '_optionsOther', title: 'Other', type: 'contentWidget', icon: 'bx-dots-horizontal'},
-                {id: '_optionsAdvanced', title: 'Advanced', type: 'contentWidget'},
-            ],
-        },
-    ],
+                { id: '_optionsAppearance', title: 'Appearance', type: 'contentWidget', icon: 'bx-layout' },
+                { id: '_optionsShortcuts', title: 'Shortcuts', type: 'contentWidget', icon: 'bxs-keyboard' },
+                { id: '_optionsTextNotes', title: 'Text Notes', type: 'contentWidget', icon: 'bx-text' },
+                { id: '_optionsCodeNotes', title: 'Code Notes', type: 'contentWidget', icon: 'bx-code' },
+                { id: '_optionsImages', title: 'Images', type: 'contentWidget', icon: 'bx-image' },
+                { id: '_optionsSpellcheck', title: 'Spellcheck', type: 'contentWidget', icon: 'bx-check-double' },
+                { id: '_optionsPassword', title: 'Password', type: 'contentWidget', icon: 'bx-lock' },
+                { id: '_optionsMFA', title: 'MFA', type: 'contentWidget', icon: 'bx-lock'},
+                { id: '_optionsEtapi', title: 'ETAPI', type: 'contentWidget', icon: 'bx-extension' },
+                { id: '_optionsBackup', title: 'Backup', type: 'contentWidget', icon: 'bx-data' },
+                { id: '_optionsSync', title: 'Sync', type: 'contentWidget', icon: 'bx-wifi' },
+                { id: '_optionsOther', title: 'Other', type: 'contentWidget', icon: 'bx-dots-horizontal' },
+                { id: '_optionsAdvanced', title: 'Advanced', type: 'contentWidget' }
+            ]
+        }
+    ]
 };
 
 function checkHiddenSubtree(force = false) {
     if (!force && !migrationService.isDbUpToDate()) {
         // on-delete hook might get triggered during some future migration and cause havoc
-        log.info('Will not check hidden subtree until migration is finished.');
+        log.info("Will not check hidden subtree until migration is finished.");
         return;
     }
 
@@ -386,35 +289,35 @@ function checkHiddenSubtreeRecursively(parentNoteId: string, item: Item) {
             type: item.type,
             parentNoteId: parentNoteId,
             content: '',
-            ignoreForbiddenParents: true,
+            ignoreForbiddenParents: true
         }));
     } else {
-        branch = note.getParentBranches().find((branch) => branch.parentNoteId === parentNoteId);
+        branch = note.getParentBranches().find(branch => branch.parentNoteId === parentNoteId);
     }
 
     const attrs = [...(item.attributes || [])];
 
     if (item.icon) {
-        attrs.push({type: 'label', name: 'iconClass', value: `bx ${item.icon}`});
+        attrs.push({ type: 'label', name: 'iconClass', value: `bx ${item.icon}` });
     }
 
     if (item.type === 'launcher') {
         if (item.command) {
-            attrs.push({type: 'relation', name: 'template', value: LBTPL_COMMAND});
-            attrs.push({type: 'label', name: 'command', value: item.command});
+            attrs.push({ type: 'relation', name: 'template', value: LBTPL_COMMAND });
+            attrs.push({ type: 'label', name: 'command', value: item.command });
         } else if (item.builtinWidget) {
             if (item.builtinWidget === 'spacer') {
-                attrs.push({type: 'relation', name: 'template', value: LBTPL_SPACER});
-                attrs.push({type: 'label', name: 'baseSize', value: item.baseSize});
-                attrs.push({type: 'label', name: 'growthFactor', value: item.growthFactor});
+                attrs.push({ type: 'relation', name: 'template', value: LBTPL_SPACER });
+                attrs.push({ type: 'label', name: 'baseSize', value: item.baseSize });
+                attrs.push({ type: 'label', name: 'growthFactor', value: item.growthFactor });
             } else {
-                attrs.push({type: 'relation', name: 'template', value: LBTPL_BUILTIN_WIDGET});
+                attrs.push({ type: 'relation', name: 'template', value: LBTPL_BUILTIN_WIDGET });
             }
 
-            attrs.push({type: 'label', name: 'builtinWidget', value: item.builtinWidget});
+            attrs.push({ type: 'label', name: 'builtinWidget', value: item.builtinWidget });
         } else if (item.targetNoteId) {
-            attrs.push({type: 'relation', name: 'template', value: LBTPL_NOTE_LAUNCHER});
-            attrs.push({type: 'relation', name: 'target', value: item.targetNoteId});
+            attrs.push({ type: 'relation', name: 'template', value: LBTPL_NOTE_LAUNCHER });
+            attrs.push({ type: 'relation', name: 'target', value: item.targetNoteId });
         } else {
             throw new Error(`No action defined for launcher ${JSON.stringify(item)}`);
         }
@@ -441,16 +344,16 @@ function checkHiddenSubtreeRecursively(parentNoteId: string, item: Item) {
     }
 
     for (const attr of attrs) {
-        const attrId = note.noteId + '_' + attr.type.charAt(0) + attr.name;
+        const attrId = note.noteId + "_" + attr.type.charAt(0) + attr.name;
 
-        if (!note.getAttributes().find((attr) => attr.attributeId === attrId)) {
+        if (!note.getAttributes().find(attr => attr.attributeId === attrId)) {
             new BAttribute({
                 attributeId: attrId,
                 noteId: note.noteId,
                 type: attr.type,
                 name: attr.name,
                 value: attr.value,
-                isInheritable: false,
+                isInheritable: false
             }).save();
         }
     }
@@ -469,5 +372,5 @@ export = {
     LBTPL_SCRIPT,
     LBTPL_BUILTIN_WIDGET,
     LBTPL_SPACER,
-    LBTPL_CUSTOM_WIDGET,
+    LBTPL_CUSTOM_WIDGET
 };

@@ -1,6 +1,4 @@
-/** @format */
-
-'use strict';
+"use strict";
 
 import optionService = require('../options');
 import crypto = require('crypto');
@@ -18,11 +16,8 @@ function getPasswordDerivedKey(password: crypto.BinaryLike) {
 }
 
 function getScryptHash(password: crypto.BinaryLike, salt: crypto.BinaryLike) {
-    const hashed = crypto.scryptSync(password, salt, 32, {
-        N: 16384,
-        r: 8,
-        p: 1,
-    });
+    const hashed = crypto.scryptSync(password, salt, 32,
+        {N: 16384, r:8, p:1});
 
     return hashed;
 }

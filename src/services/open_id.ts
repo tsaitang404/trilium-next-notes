@@ -1,5 +1,3 @@
-/** @format */
-
 import OpenIDError = require('../errors/open_id_error');
 import {NextFunction, Request, Response} from 'express';
 import openIDService = require('./encryption/open_id');

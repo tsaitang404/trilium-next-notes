@@ -1,30 +1,28 @@
-/** @format */
-
-'use strict';
+"use strict";
 
 import utils = require('../services/utils');
 import optionService = require('../services/options');
 import myScryptService = require('../services/encryption/my_scrypt');
 import log = require('../services/log');
 import passwordService = require('../services/encryption/password');
-import assetPath = require('../services/asset_path');
-import appPath = require('../services/app_path');
-import ValidationError = require('../errors/validation_error');
 import totp_secret = require('../services/totp');
-import {Request, Response} from 'express';
-import {AppRequest} from './route-interface';
 import recoveryCodeService = require('../services/encryption/recovery_codes');
 import openIDService = require('../services/open_id');
 import openID = require('../services/encryption/open_id');
-
+import assetPath = require('../services/asset_path');
+import appPath = require('../services/app_path');
+import ValidationError = require('../errors/validation_error');
+import { Request, Response } from 'express';
+import { AppRequest } from './route-interface';
 const speakeasy = require('speakeasy');
 
 function loginPage(req: Request, res: Response) {
     res.render('login', {
         failedAuth: false,
-        totpEnabled: optionService.getOptionBool('totpEnabled') && totp_secret.checkForTotSecret(),
+        totpEnabled: optionService.getOptionBool('totpEnabled')
+            && totp_secret.checkForTotSecret(),
         assetPath: assetPath,
-        appPath: appPath,
+        appPath: appPath
     });
 }
 
@@ -32,13 +30,13 @@ function setPasswordPage(req: Request, res: Response) {
     res.render('set_password', {
         error: false,
         assetPath: assetPath,
-        appPath: appPath,
+        appPath: appPath
     });
 }
 
 function setPassword(req: Request, res: Response) {
     if (passwordService.isPasswordSet()) {
-        throw new ValidationError('Password has been already set');
+        throw new ValidationError("Password has been already set");
     }
 
     let {password1, password2} = req.body;
@@ -50,13 +48,13 @@ function setPassword(req: Request, res: Response) {
     if (password1 !== password2) {
         error = "Entered passwords don't match.";
     } else if (password1.length < 4) {
-        error = 'Password must be at least 4 characters long.';
+        error = "Password must be at least 4 characters long.";
     }
 
     if (error) {
         res.render('set_password', {
             error,
-            assetPath: assetPath,
+            assetPath: assetPath
         });
         return;
     }
@@ -70,30 +68,45 @@ function login(req: AppRequest, res: Response) {
     const guessedPassword = req.body.password;
     const guessedTotp = req.body.token;
 
-    if (!verifyPassword(guessedPassword)) {
-        sendLoginError(req, res);
-        return;
-    }
+    if (verifyPassword(guessedPassword)) {
 
-    if (optionService.getOptionBool('totpEnabled') && totp_secret.checkForTotSecret())
-        if (!verifyTOTP(guessedTotp)) {
+        if (!verifyPassword(guessedPassword)) {
             sendLoginError(req, res);
             return;
         }
 
-    const rememberMe = req.body.rememberMe;
+        if (optionService.getOptionBool('totpEnabled') && totp_secret.checkForTotSecret())
+            if (!verifyTOTP(guessedTotp)) {
+                sendLoginError(req, res);
+                return;
+            }
 
-    req.session.regenerate(() => {
-        if (rememberMe) {
-            req.session.cookie.maxAge = 21 * 24 * 3600000; // 3 weeks
-        } else {
-            req.session.cookie.expires = null;
-        }
+        
+        const rememberMe = req.body.rememberMe;
 
-        req.session.loggedIn = true;
-        res.redirect('.');
-    });
+        req.session.regenerate(() => {
+            if (rememberMe) {
+                req.session.cookie.maxAge = 21 * 24 * 3600000;  // 3 weeks
+            } else {
+                req.session.cookie.expires = null;
+            }
+
+            req.session.loggedIn = true;
+            res.redirect('.');
+        });
+    }
+    else {
+        // note that logged IP address is usually meaningless since the traffic should come from a reverse proxy
+        log.info(`WARNING: Wrong password from ${req.ip}, rejecting.`);
+
+        res.status(401).render('login', {
+            failedAuth: true,
+            assetPath: assetPath
+        });
+    }
 }
+
+
 
 function sendLoginError(req: AppRequest, res: Response) {
     // note that logged IP address is usually meaningless since the traffic should come from a reverse proxy
@@ -114,7 +127,8 @@ function verifyTOTP(guessedToken: string) {
         window: 1,
     });
 
-    if (tokenValidates) return true;
+    if (tokenValidates) 
+        return true;
 
     const recoveryCodeValidates = recoveryCodeService.verifyRecoveryCode(guessedToken);
 
@@ -133,9 +147,12 @@ function logout(req: AppRequest, res: Response) {
     req.session.regenerate(() => {
         req.session.loggedIn = false;
 
-        if (openIDService.isOpenIDEnabled() && openID.isSubjectIdentifierSaved()) res.oidc.logout({});
-        else res.redirect('login');
+        if (openIDService.isOpenIDEnabled() && openID.isSubjectIdentifierSaved()) 
+            res.oidc.logout({});
+        else 
+            res.redirect('login');
     });
+
 }
 
 export = {
@@ -143,5 +160,5 @@ export = {
     setPasswordPage,
     setPassword,
     login,
-    logout,
+    logout
 };

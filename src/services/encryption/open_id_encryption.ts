@@ -1,5 +1,3 @@
-/** @format */
-
 import optionService = require('../options');
 import myScryptService = require('./my_scrypt');
 import utils = require('../utils');
