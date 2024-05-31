@@ -5,6 +5,7 @@ import optionService = require('../options');
 import myScryptService = require('./my_scrypt');
 import utils = require('../utils');
 import totpEncryptionService = require('./totp_secret_encryption');
+import {Totp} from 'time2fa';
 
 function isTotpSecretSet() {
     return !!sql.getValue("SELECT value FROM options WHERE name = 'passwordVerificationHash'");
@@ -30,7 +31,22 @@ function setTotpSecret(secret: string) {
     };
 }
 
+function validateTOTP(guessedPasscode: string) {
+    if (process.env.TOTP_SECRET === undefined) return false;
+
+    try {
+        const valid = Totp.validate({
+            passcode: guessedPasscode,
+            secret: process.env.TOTP_SECRET.trim()
+        });
+        return valid;
+    } catch (e) {
+        return false;
+    }
+}
+
 export = {
     isTotpSecretSet,
-    setTotpSecret
+    setTotpSecret,
+    validateTOTP
 };

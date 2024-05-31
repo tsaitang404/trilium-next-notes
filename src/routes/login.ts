@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 import utils = require('../services/utils');
 import optionService = require('../services/options');
@@ -12,15 +12,14 @@ import openID = require('../services/encryption/open_id');
 import assetPath = require('../services/asset_path');
 import appPath = require('../services/app_path');
 import ValidationError = require('../errors/validation_error');
-import { Request, Response } from 'express';
-import { AppRequest } from './route-interface';
-const speakeasy = require('speakeasy');
+import {Request, Response} from 'express';
+import {AppRequest} from './route-interface';
+import totp = require('../services/encryption/totp_secret');
 
 function loginPage(req: Request, res: Response) {
     res.render('login', {
         failedAuth: false,
-        totpEnabled: optionService.getOptionBool('totpEnabled')
-            && totp_secret.checkForTotSecret(),
+        totpEnabled: optionService.getOptionBool('totpEnabled') && totp_secret.checkForTotSecret(),
         assetPath: assetPath,
         appPath: appPath
     });
@@ -36,7 +35,7 @@ function setPasswordPage(req: Request, res: Response) {
 
 function setPassword(req: Request, res: Response) {
     if (passwordService.isPasswordSet()) {
-        throw new ValidationError("Password has been already set");
+        throw new ValidationError('Password has been already set');
     }
 
     let {password1, password2} = req.body;
@@ -48,7 +47,7 @@ function setPassword(req: Request, res: Response) {
     if (password1 !== password2) {
         error = "Entered passwords don't match.";
     } else if (password1.length < 4) {
-        error = "Password must be at least 4 characters long.";
+        error = 'Password must be at least 4 characters long.';
     }
 
     if (error) {
@@ -69,7 +68,6 @@ function login(req: AppRequest, res: Response) {
     const guessedTotp = req.body.token;
 
     if (verifyPassword(guessedPassword)) {
-
         if (!verifyPassword(guessedPassword)) {
             sendLoginError(req, res);
             return;
@@ -81,12 +79,11 @@ function login(req: AppRequest, res: Response) {
                 return;
             }
 
-        
         const rememberMe = req.body.rememberMe;
 
         req.session.regenerate(() => {
             if (rememberMe) {
-                req.session.cookie.maxAge = 21 * 24 * 3600000;  // 3 weeks
+                req.session.cookie.maxAge = 21 * 24 * 3600000; // 3 weeks
             } else {
                 req.session.cookie.expires = null;
             }
@@ -94,8 +91,7 @@ function login(req: AppRequest, res: Response) {
             req.session.loggedIn = true;
             res.redirect('.');
         });
-    }
-    else {
+    } else {
         // note that logged IP address is usually meaningless since the traffic should come from a reverse proxy
         log.info(`WARNING: Wrong password from ${req.ip}, rejecting.`);
 
@@ -106,8 +102,6 @@ function login(req: AppRequest, res: Response) {
     }
 }
 
-
-
 function sendLoginError(req: AppRequest, res: Response) {
     // note that logged IP address is usually meaningless since the traffic should come from a reverse proxy
     log.info(`WARNING: Wrong password or TOTP from ${req.ip}, rejecting.`);
@@ -115,20 +109,12 @@ function sendLoginError(req: AppRequest, res: Response) {
     res.status(401).render('login', {
         failedAuth: true,
         totpEnabled: optionService.getOption('totpEnabled') && totp_secret.checkForTotSecret(),
-        assetPath: assetPath,
+        assetPath: assetPath
     });
 }
 
 function verifyTOTP(guessedToken: string) {
-    const tokenValidates = speakeasy.totp.verify({
-        secret: totp_secret.getTotpSecret(),
-        encoding: 'base32',
-        token: guessedToken,
-        window: 1,
-    });
-
-    if (tokenValidates) 
-        return true;
+    if (totp.validateTOTP(guessedToken)) return true;
 
     const recoveryCodeValidates = recoveryCodeService.verifyRecoveryCode(guessedToken);
 
@@ -147,12 +133,9 @@ function logout(req: AppRequest, res: Response) {
     req.session.regenerate(() => {
         req.session.loggedIn = false;
 
-        if (openIDService.isOpenIDEnabled() && openID.isSubjectIdentifierSaved()) 
-            res.oidc.logout({});
-        else 
-            res.redirect('login');
+        if (openIDService.isOpenIDEnabled() && openID.isSubjectIdentifierSaved()) res.oidc.logout({});
+        else res.redirect('login');
     });
-
 }
 
 export = {

@@ -1,8 +1,8 @@
 import options = require('../../services/options');
-const speakeasy = require('speakeasy');
+import {generateSecret} from 'time2fa';
 
-function generateSecret() {
-    return {success: 'true', message: speakeasy.generateSecret().base32};
+function generateTOTPSecret() {
+    return {success: 'true', message: generateSecret()};
 }
 
 function getTotpEnabled() {
@@ -35,9 +35,9 @@ function getSecret() {
 }
 
 export = {
-    generateSecret,
+    generateSecret: generateTOTPSecret,
     getTOTPStatus,
     enableTOTP,
     disableTOTP,
-    getSecret,
+    getSecret
 };
