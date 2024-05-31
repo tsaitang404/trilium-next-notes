@@ -14,7 +14,7 @@ import appPath = require('../services/app_path');
 import ValidationError = require('../errors/validation_error');
 import {Request, Response} from 'express';
 import {AppRequest} from './route-interface';
-import totp = require('../services/encryption/totp_secret');
+import totp = require('../services/totp');
 
 function loginPage(req: Request, res: Response) {
     res.render('login', {
