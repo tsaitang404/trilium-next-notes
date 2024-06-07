@@ -1,6 +1,6 @@
-import server from '../../../services/server.js';
-import toastService from '../../../services/toast.js';
-import OptionsWidget from './options_widget.js';
+import server from "../../../services/server.js";
+import toastService from "../../../services/toast.js";
+import OptionsWidget from "./options_widget.js";
 
 const TPL = `
 <div class="options-section">
@@ -22,7 +22,7 @@ const TPL = `
             <label>
             <b>Enable OAuth/OpenID</b>
             </label>
-            <input type="checkbox" class="oauth-enabled-checkbox" />
+            <input type="checkbox" class="oauth-enabled-checkbox" disabled="true" />
             <span class="env-oauth-enabled" "alert alert-warning" role="alert" style="font-weight: bold; color: red !important;" > </span>
         </div>
         <div>
@@ -91,182 +91,197 @@ const TPL = `
 `;
 
 export default class MultiFactorAuthenticationOptions extends OptionsWidget {
-    doRender() {
-        this.$widget = $(TPL);
+  doRender() {
+    this.$widget = $(TPL);
 
-        this.$regenerateTotpButton = this.$widget.find('.regenerate-totp');
-        this.$totpDetails = this.$widget.find('.totp-details');
-        this.$totpEnabled = this.$widget.find('.totp-enabled');
-        this.$totpSecret = this.$widget.find('.totp-secret');
-        this.$totpSecretInput = this.$widget.find('.totp-secret-input');
-        this.$authenticatorCode = this.$widget.find('.authenticator-code');
-        this.$generateRecoveryCodeButton = this.$widget.find('.generate-recovery-code');
-        this.$oAuthEnabledCheckbox = this.$widget.find('.oauth-enabled-checkbox');
-        this.$saveUserButton = this.$widget.find('.save-user-button');
-        this.$oauthLoginButton = this.$widget.find('.oauth-login-button');
-        this.$tokenStatus = this.$widget.find('.token-status');
-        this.$userStatus = this.$widget.find('.user-status');
-        this.$envEnabledTOTP = this.$widget.find('.env-totp-enabled');
-        this.$envEnabledOAuth = this.$widget.find('.env-oauth-enabled');
+    this.$regenerateTotpButton = this.$widget.find(".regenerate-totp");
+    this.$totpDetails = this.$widget.find(".totp-details");
+    this.$totpEnabled = this.$widget.find(".totp-enabled");
+    this.$totpSecret = this.$widget.find(".totp-secret");
+    this.$totpSecretInput = this.$widget.find(".totp-secret-input");
+    this.$authenticatorCode = this.$widget.find(".authenticator-code");
+    this.$generateRecoveryCodeButton = this.$widget.find(
+      ".generate-recovery-code"
+    );
+    this.$oAuthEnabledCheckbox = this.$widget.find(".oauth-enabled-checkbox");
+    this.$saveUserButton = this.$widget.find(".save-user-button");
+    this.$oauthLoginButton = this.$widget.find(".oauth-login-button");
+    this.$tokenStatus = this.$widget.find(".token-status");
+    this.$userStatus = this.$widget.find(".user-status");
+    this.$envEnabledTOTP = this.$widget.find(".env-totp-enabled");
+    this.$envEnabledOAuth = this.$widget.find(".env-oauth-enabled");
 
-        this.$recoveryKeys = [];
+    this.$recoveryKeys = [];
 
-        for (let i = 0; i < 8; i++) this.$recoveryKeys.push(this.$widget.find('.key_' + i));
+    for (let i = 0; i < 8; i++)
+      this.$recoveryKeys.push(this.$widget.find(".key_" + i));
 
-        this.$totpEnabled.on('change', async () => {
-            this.updateSecret();
+    this.$totpEnabled.on("change", async () => {
+      this.updateSecret();
+    });
+
+    this.$oAuthEnabledCheckbox.on("change", async () => {
+      this.updateOAuthStatus();
+    });
+
+    this.$generateRecoveryCodeButton.on("click", async () => {
+      this.setRecoveryKeys();
+    });
+
+    this.$regenerateTotpButton.on("click", async () => {
+      this.generateKey();
+    });
+
+    this.$saveUserButton.on("click", (async) => {
+      server
+        .get("oauth/authenticate")
+        .then((result) => {
+          console.log(result.message);
+          toastService.showMessage(result.message);
+        })
+        .catch((result) => {
+          console.error(result.message);
+          toastService.showError(result.message);
         });
+    });
 
-        this.$oAuthEnabledCheckbox.on('change', async () => {
-            this.updateOAuthStatus();
-        });
+    this.$protectedSessionTimeout = this.$widget.find(
+      ".protected-session-timeout-in-seconds"
+    );
+    this.$protectedSessionTimeout.on("change", () =>
+      this.updateOption(
+        "protectedSessionTimeout",
+        this.$protectedSessionTimeout.val()
+      )
+    );
 
-        this.$generateRecoveryCodeButton.on('click', async () => {
-            this.setRecoveryKeys();
-        });
+    this.displayRecoveryKeys();
+  }
 
-        this.$regenerateTotpButton.on('click', async () => {
-            this.generateKey();
-        });
+  async updateSecret() {
+    if (this.$totpEnabled.prop("checked")) server.post("totp/enable");
+    else server.post("totp/disable");
+  }
 
-        this.$saveUserButton.on('click', (async) => {
-            server
-                .get('oauth/authenticate')
-                .then((result) => {
-                    console.log(result.message);
-                    toastService.showMessage(result.message);
-                })
-                .catch((result) => {
-                    console.error(result.message);
-                    toastService.showError(result.message);
-                });
-        });
+  async updateOAuthStatus() {
+    if (this.$oAuthEnabledCheckbox.prop("checked")) server.post("oauth/enable");
+    else server.post("oauth/disable");
+  }
 
-        this.$protectedSessionTimeout = this.$widget.find('.protected-session-timeout-in-seconds');
-        this.$protectedSessionTimeout.on('change', () =>
-            this.updateOption('protectedSessionTimeout', this.$protectedSessionTimeout.val())
+  async setRecoveryKeys() {
+    server.get("totp_recovery/generate").then((result) => {
+      if (!result.success) {
+        toastService.showError("Error in revevery code generation!");
+        return;
+      }
+      this.keyFiller(result.recoveryCodes);
+      server.post("totp_recovery/set", {
+        recoveryCodes: result.recoveryCodes,
+      });
+    });
+  }
+
+  async keyFiller(values) {
+    // Forces values to be a string so it doesn't error out when I split.
+    // Will be a non-issue when I update everything to typescript.
+    const keys = (values + "").split(",");
+    for (let i = 0; i < keys.length; i++) this.$recoveryKeys[i].text(keys[i]);
+  }
+
+  async generateKey() {
+    server.get("totp/generate").then((result) => {
+      if (result.success) {
+        this.$totpSecret.text(result.message);
+      } else {
+        toastService.showError(result.message);
+      }
+    });
+  }
+
+  optionsLoaded(options) {
+    // TODO: Rework the logic since I've changed how OAuth works
+
+    // server.get("oauth/status").then((result) => {
+    //   if (result.enabled) {
+    //     if (result.success)
+    //       this.$oAuthEnabledCheckbox.prop("checked", result.message);
+
+    //     this.$oauthLoginButton.prop("disabled", !result.message);
+    //     this.$saveUserButton.prop("disabled", !result.message);
+
+    //     if (result.message) {
+    //       this.$oauthLoginButton.prop("disabled", false);
+    //       this.$saveUserButton.prop("disabled", false);
+    //       server.get("oauth/validate").then((result) => {
+    //         if (result.success) {
+    //           this.$tokenStatus.text("Logged in!");
+
+    //           if (result.user) {
+    //             this.$userStatus.text("User saved!");
+    //           } else {
+    //             this.$saveUserButton.prop("disabled", false);
+    //             this.$userStatus.text("User not saved");
+    //           }
+    //         } else this.$tokenStatus.text("Not logged in!");
+    //       });
+    //     }
+    //   } else {
+    //     this.$oAuthEnabledCheckbox.prop("checked", false);
+    //     this.$oauthLoginButton.prop("disabled", true);
+    //     this.$saveUserButton.prop("disabled", true);
+    //     this.$oAuthEnabledCheckbox.prop("disabled", true);
+
+    //     this.$envEnabledOAuth.text(
+    //       "OAuth can only be enabled with environment variables. REQUIRES RESTART"
+    //     );
+    //   }
+    // });
+
+    server.get("totp/status").then((result) => {
+      if (result.enabled)
+        if (result.success) {
+          this.$totpEnabled.prop("checked", result.message);
+          this.$totpSecretInput.prop("disabled", !result.message);
+          this.$totpSecret.prop("disapbled", !result.message);
+          this.$regenerateTotpButton.prop("disabled", !result.message);
+          this.$authenticatorCode.prop("disabled", !result.message);
+          this.$generateRecoveryCodeButton.prop("disabled", !result.message);
+        } else {
+          toastService.showError(result.message);
+        }
+      else {
+        this.$totpEnabled.prop("checked", false);
+        this.$totpEnabled.prop("disabled", true);
+        this.$totpSecretInput.prop("disabled", true);
+        this.$totpSecret.prop("disapbled", true);
+        this.$regenerateTotpButton.prop("disabled", true);
+        this.$authenticatorCode.prop("disabled", true);
+        this.$generateRecoveryCodeButton.prop("disabled", true);
+
+        this.$envEnabledTOTP.text(
+          "TOTP_ENABLED is not set in environment variable. Requires restart."
         );
+      }
+    });
+    this.$protectedSessionTimeout.val(options.protectedSessionTimeout);
+  }
 
-        this.displayRecoveryKeys();
-    }
+  displayRecoveryKeys() {
+    server.get("totp_recovery/enabled").then((result) => {
+      if (!result.success) {
+        this.keyFiller(Array(8).fill("Error generating recovery keys!"));
+        return;
+      }
 
-    async updateSecret() {
-        if (this.$totpEnabled.prop('checked')) server.post('totp/enable');
-        else server.post('totp/disable');
-    }
-
-    async updateOAuthStatus() {
-        if (this.$oAuthEnabledCheckbox.prop('checked')) server.post('oauth/enable');
-        else server.post('oauth/disable');
-    }
-
-    async setRecoveryKeys() {
-        server.get('totp_recovery/generate').then((result) => {
-            if (!result.success) {
-                toastService.showError('Error in revevery code generation!');
-                return;
-            }
-            this.keyFiller(result.recoveryCodes);
-            server.post('totp_recovery/set', {
-                recoveryCodes: result.recoveryCodes,
-            });
-        });
-    }
-
-    async keyFiller(values) {
-        // Forces values to be a string so it doesn't error out when I split.
-        // Will be a non-issue when I update everything to typescript.
-        const keys = (values + '').split(',');
-        for (let i = 0; i < keys.length; i++) this.$recoveryKeys[i].text(keys[i]);
-    }
-
-    async generateKey() {
-        server.get('totp/generate').then((result) => {
-            if (result.success) {
-                this.$totpSecret.text(result.message);
-            } else {
-                toastService.showError(result.message);
-            }
-        });
-    }
-
-    optionsLoaded(options) {
-        server.get('oauth/status').then((result) => {
-            if (result.enabled) {
-                if (result.success) this.$oAuthEnabledCheckbox.prop('checked', result.message);
-
-                this.$oauthLoginButton.prop('disabled', !result.message);
-                this.$saveUserButton.prop('disabled', !result.message);
-
-                if (result.message) {
-                    this.$oauthLoginButton.prop('disabled', false);
-                    this.$saveUserButton.prop('disabled', false);
-                    server.get('oauth/validate').then((result) => {
-                        if (result.success) {
-                            this.$tokenStatus.text('Logged in!');
-
-                            if (result.user) {
-                                this.$userStatus.text('User saved!');
-                            } else {
-                                this.$saveUserButton.prop('disabled', false);
-                                this.$userStatus.text('User not saved');
-                            }
-                        } else this.$tokenStatus.text('Not logged in!');
-                    });
-                }
-            } else {
-                this.$oAuthEnabledCheckbox.prop('checked', false);
-                this.$oauthLoginButton.prop('disabled', true);
-                this.$saveUserButton.prop('disabled', true);
-                this.$oAuthEnabledCheckbox.prop('disabled', true);
-
-                this.$envEnabledOAuth.text('OAUTH_ENABLED is not set in environment variable. Requires restart.');
-            }
-        });
-
-        server.get('totp/status').then((result) => {
-            if (result.enabled)
-                if (result.success) {
-                    this.$totpEnabled.prop('checked', result.message);
-                    this.$totpSecretInput.prop('disabled', !result.message);
-                    this.$totpSecret.prop('disapbled', !result.message);
-                    this.$regenerateTotpButton.prop('disabled', !result.message);
-                    this.$authenticatorCode.prop('disabled', !result.message);
-                    this.$generateRecoveryCodeButton.prop('disabled', !result.message);
-                } else {
-                    toastService.showError(result.message);
-                }
-            else {
-                this.$totpEnabled.prop('checked', false);
-                this.$totpEnabled.prop('disabled', true);
-                this.$totpSecretInput.prop('disabled', true);
-                this.$totpSecret.prop('disapbled', true);
-                this.$regenerateTotpButton.prop('disabled', true);
-                this.$authenticatorCode.prop('disabled', true);
-                this.$generateRecoveryCodeButton.prop('disabled', true);
-
-                this.$envEnabledTOTP.text('TOTP_ENABLED is not set in environment variable. Requires restart.');
-            }
-        });
-        this.$protectedSessionTimeout.val(options.protectedSessionTimeout);
-    }
-
-    displayRecoveryKeys() {
-        server.get('totp_recovery/enabled').then((result) => {
-            if (!result.success) {
-                this.keyFiller(Array(8).fill('Error generating recovery keys!'));
-                return;
-            }
-
-            if (!result.keysExist) {
-                this.keyFiller(Array(8).fill('No key set'));
-                this.$generateRecoveryCodeButton.text('Generate Recovery Codes');
-                return;
-            }
-        });
-        server.get('totp_recovery/used').then((result) => {
-            this.keyFiller((result.usedRecoveryCodes + '').split(','));
-            this.$generateRecoveryCodeButton.text('Regenerate Recovery Codes');
-        });
-    }
+      if (!result.keysExist) {
+        this.keyFiller(Array(8).fill("No key set"));
+        this.$generateRecoveryCodeButton.text("Generate Recovery Codes");
+        return;
+      }
+    });
+    server.get("totp_recovery/used").then((result) => {
+      this.keyFiller((result.usedRecoveryCodes + "").split(","));
+      this.$generateRecoveryCodeButton.text("Regenerate Recovery Codes");
+    });
+  }
 }

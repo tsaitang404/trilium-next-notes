@@ -62,6 +62,10 @@ CREATE TABLE IF NOT EXISTS "options"
     isSynced INTEGER default 0 not null,
     utcDateModified TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS "user_data"
+(
+    userID TEXT not null PRIMARY KEY
+);
 CREATE TABLE IF NOT EXISTS "attributes"
 (
     attributeId      TEXT not null primary key,
