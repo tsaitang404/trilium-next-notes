@@ -1,10 +1,10 @@
-import optionService = require('../options');
-import myScryptService = require('./my_scrypt');
-import utils = require('../utils');
-import dataEncryptionService = require('./data_encryption');
+import optionService = require("../options");
+import myScryptService = require("./my_scrypt");
+import utils = require("../utils");
+import dataEncryptionService = require("./data_encryption");
 
 function verifyOpenIDSubjectIdentifier(subjectIdentifier: string) {
-    if (!optionService.getOptionBool('userSubjectIdentifierSaved')) {
+    if (!optionService.getOptionBool("userSubjectIdentifierSaved")) {
         return false;
     }
 
@@ -12,27 +12,43 @@ function verifyOpenIDSubjectIdentifier(subjectIdentifier: string) {
         myScryptService.getSubjectIdentifierVerificationHash(subjectIdentifier)
     );
 
-    const dbSubjectIdentifierHash = optionService.getOptionOrNull('subjectIdentifierVerificationHash');
+    const dbSubjectIdentifierHash = optionService.getOptionOrNull(
+        "subjectIdentifierVerificationHash"
+    );
 
     if (!dbSubjectIdentifierHash) return false;
 
     return givenSubjectIdentifierHash === dbSubjectIdentifierHash;
 }
 
-function setDataKey(subjectIdentifier: string, plainTextDataKey: string | Buffer) {
-    const subjectIdentifierDerivedKey = myScryptService.getSubjectIdentifierDerivedKey(subjectIdentifier);
+function setDataKey(
+    subjectIdentifier: string,
+    plainTextDataKey: string | Buffer
+) {
+    const subjectIdentifierDerivedKey =
+        myScryptService.getSubjectIdentifierDerivedKey(subjectIdentifier);
 
-    const newEncryptedDataKey = dataEncryptionService.encrypt(subjectIdentifierDerivedKey, plainTextDataKey);
+    const newEncryptedDataKey = dataEncryptionService.encrypt(
+        subjectIdentifierDerivedKey,
+        plainTextDataKey
+    );
 
-    optionService.setOption('subjectIdentifierEncryptedDataKey', newEncryptedDataKey);
+    // optionService.setOption('subjectIdentifierEncryptedDataKey', newEncryptedDataKey);
+    return newEncryptedDataKey;
 }
 
 function getDataKey(subjectIdentifier: string) {
-    const subjectIdentifierDerivedKey = myScryptService.getSubjectIdentifierDerivedKey(subjectIdentifier);
+    const subjectIdentifierDerivedKey =
+        myScryptService.getSubjectIdentifierDerivedKey(subjectIdentifier);
 
-    const encryptedDataKey = optionService.getOption('subjectIdentifierEncryptedDataKey');
+    const encryptedDataKey = optionService.getOption(
+        "subjectIdentifierEncryptedDataKey"
+    );
 
-    const decryptedDataKey = dataEncryptionService.decrypt(subjectIdentifierDerivedKey, encryptedDataKey);
+    const decryptedDataKey = dataEncryptionService.decrypt(
+        subjectIdentifierDerivedKey,
+        encryptedDataKey
+    );
 
     return decryptedDataKey;
 }
