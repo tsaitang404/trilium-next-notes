@@ -2,23 +2,46 @@ import optionService = require("../options");
 import myScryptService = require("./my_scrypt");
 import utils = require("../utils");
 import dataEncryptionService = require("./data_encryption");
+import sql = require("../sql");
+import sqlInit = require("../sql_init");
 
 function verifyOpenIDSubjectIdentifier(subjectIdentifier: string) {
-    if (!optionService.getOptionBool("userSubjectIdentifierSaved")) {
-        return false;
+    // Check to see if table exists
+    if (!sqlInit.isDbInitialized()) return undefined;
+
+    const data = sql.getValue("SELECT isSetup FROM user_data");
+    if (data !== "true") {
+        console.log("DATABASE NOT SETUP");
+        return undefined;
     }
 
+    // if (!optionService.getOptionBool("userSubjectIdentifierSaved")) {
+    //     return false;
+    // }
+
+    console.log("DKDKDKDK");
+    const salt = sql.getValue("SELECT userIDVerificationSalt FROM user_data");
+    console.log(salt);
+    if (salt == undefined) return undefined;
+
     const givenSubjectIdentifierHash = utils.toBase64(
-        myScryptService.getSubjectIdentifierVerificationHash(subjectIdentifier)
+        myScryptService.getSubjectIdentifierVerificationHash(
+            subjectIdentifier,
+            utils.toBase64(salt.toString())
+        )
     );
 
-    const dbSubjectIdentifierHash = optionService.getOptionOrNull(
-        "subjectIdentifierVerificationHash"
-    );
+    const hash = sql.getValue("SELECT userIDVerificationHash FROM user_data");
+    if (hash === undefined) return undefined;
 
-    if (!dbSubjectIdentifierHash) return false;
+    const dbSubjectIdentifierHash = hash;
 
-    return givenSubjectIdentifierHash === dbSubjectIdentifierHash;
+    if (!hash) return false;
+
+    console.log("Matches: " + givenSubjectIdentifierHash === hash);
+    console.log(givenSubjectIdentifierHash);
+    console.log(hash);
+    return givenSubjectIdentifierHash === hash;
 }
 
 function setDataKey(
@@ -28,6 +51,10 @@ function setDataKey(
     const subjectIdentifierDerivedKey =
         myScryptService.getSubjectIdentifierDerivedKey(subjectIdentifier);
 
+    if (subjectIdentifierDerivedKey === undefined) {
+        console.log("SOMETHING WENT WRONG SAVING USER ID DERIVED KEY");
+        return undefined;
+    }
     const newEncryptedDataKey = dataEncryptionService.encrypt(
         subjectIdentifierDerivedKey,
         plainTextDataKey
@@ -45,6 +72,10 @@ function getDataKey(subjectIdentifier: string) {
         "subjectIdentifierEncryptedDataKey"
     );
 
+    if (subjectIdentifierDerivedKey === undefined) {
+        console.log("SOMETHING WENT WRONG SAVING USER ID DERIVED KEY");
+        return undefined;
+    }
     const decryptedDataKey = dataEncryptionService.decrypt(
         subjectIdentifierDerivedKey,
         encryptedDataKey

@@ -7,11 +7,7 @@ import { Session, auth } from "express-openid-connect";
 import sql = require("./sql");
 
 function isOpenIDEnabled() {
-    try {
-        return options.getOptionBool("oAuthEnabled");
-    } catch (e) {
-        return false;
-    }
+    return checkOpenIDRequirements();
 }
 
 function checkOpenIDRequirements() {
@@ -134,10 +130,12 @@ function generateOAuthConfig() {
             res: Response,
             session: Session
         ) => {
-            if (sqlInit.isDbInitialized())
+            if (sqlInit.isDbInitialized()) {
+                console.log("Saving USER ID");
                 openIDService.saveSubjectIdentifier(
                     req.oidc.user?.sub.toString()
                 );
+            }
             return session;
         },
     };
