@@ -64,11 +64,14 @@ CREATE TABLE IF NOT EXISTS "options"
 );
 CREATE TABLE IF NOT EXISTS "user_data"
 (
-    userIDEcnryptedDataKey TEXT not null,
-    userIDVerificationHash TEXT not null,
-    userIDVerificationSalt TEXT not null,
-    userIDDerivedKey TEXT not null,
-    isSetup TEXT DEFAULT "false"
+    tmpID INT,
+    userIDEcnryptedDataKey TEXT,
+    userIDVerificationHash TEXT,
+    salt TEXT,
+    derivedKey TEXT,
+    isSetup TEXT DEFAULT "false",
+    UNIQUE (tmpID),
+    PRIMARY KEY (tmpID)
 );
 CREATE TABLE IF NOT EXISTS "attributes"
 (
