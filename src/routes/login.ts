@@ -15,14 +15,19 @@ import ValidationError = require("../errors/validation_error");
 import { Request, Response } from "express";
 import { AppRequest } from "./route-interface";
 import totp = require("../services/totp");
+import open_id = require("../services/open_id");
 
 function loginPage(req: Request, res: Response) {
-  res.render("login", {
-    failedAuth: false,
-    totpEnabled: optionService.getOptionBool("totpEnabled") && totp_secret.checkForTotSecret(),
-    assetPath: assetPath,
-    appPath: appPath,
-  });
+  if (open_id.isOpenIDEnabled()) {
+    res.redirect("/authenticate");
+  } else {
+    res.render("login", {
+      failedAuth: false,
+      totpEnabled: optionService.getOptionBool("totpEnabled") && totp_secret.checkForTotSecret(),
+      assetPath: assetPath,
+      appPath: appPath,
+    });
+  }
 }
 
 function setPasswordPage(req: Request, res: Response) {
@@ -133,8 +138,7 @@ function logout(req: AppRequest, res: Response) {
   req.session.regenerate(() => {
     req.session.loggedIn = false;
     if (openIDService.isOpenIDEnabled() && openIDEncryption.isSubjectIdentifierSaved()) {
-      console.log("CAN LOGOUT");
-      res.oidc.logout({});
+      res.oidc.logout({ returnTo: "/authenticate" });
     } else res.redirect("login");
   });
 }
