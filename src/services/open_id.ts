@@ -16,14 +16,28 @@ function isUserSaved() {
 }
 
 function checkOpenIDRequirements() {
-  if (process.env.OAUTH_ENABLED === undefined) return false;
-  if (process.env.OAUTH_ENABLED.toLocaleLowerCase() !== "true") return false;
+  if (process.env.OAUTH_ENABLED === undefined) {
+    return false;
+  }
+  if (process.env.OAUTH_ENABLED.toLocaleLowerCase() !== "true") {
+    return false;
+  }
 
-  if (process.env.BASE_URL === undefined) throw new OpenIDError("BASE_URL is undefined in .env!");
-  if (process.env.CLIENT_ID === undefined) throw new OpenIDError("CLIENT_ID is undefined in .env!");
-  if (process.env.ISSUER_BASE_URL === undefined) throw new OpenIDError("ISSUER_BASE_URL is undefined in .env!");
-  if (process.env.SECRET === undefined) throw new OpenIDError("SECRET is undefined in .env!");
-  if (process.env.AUTH_0_LOGOUT === undefined) throw new OpenIDError("AUTH_0_LOGOUT is undefined in .env!");
+  if (process.env.BASE_URL === undefined) {
+    throw new OpenIDError("BASE_URL is undefined in .env!");
+  }
+  if (process.env.CLIENT_ID === undefined) {
+    throw new OpenIDError("CLIENT_ID is undefined in .env!");
+  }
+  if (process.env.ISSUER_BASE_URL === undefined) {
+    throw new OpenIDError("ISSUER_BASE_URL is undefined in .env!");
+  }
+  if (process.env.SECRET === undefined) {
+    throw new OpenIDError("SECRET is undefined in .env!");
+  }
+  if (process.env.AUTH_0_LOGOUT === undefined) {
+    throw new OpenIDError("AUTH_0_LOGOUT is undefined in .env!");
+  }
 
   return true;
 }
@@ -96,7 +110,7 @@ function generateOAuthConfig() {
       scope: "openid profile email",
     },
     routes: authRoutes,
-    idpLogout: true,
+    idpLogout: false,
     logoutParams: logoutParams,
     afterCallback: async (req: Request, res: Response, session: Session) => {
       if (!sqlInit.isDbInitialized()) return session;
