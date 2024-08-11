@@ -159,13 +159,22 @@ export default class MultiFactorAuthenticationOptions extends OptionsWidget {
   }
 
   async updateSecret() {
-    if (this.$totpEnabled.prop("checked")) server.post("totp/enable");
-    else server.post("totp/disable");
+    if (this.$totpEnabled.prop("checked")) {
+      server.post("totp/enable");
+
+    }
+    else {
+      server.post("totp/disable");
+    }
   }
 
   async updateOAuthStatus() {
-    if (this.$oAuthEnabledCheckbox.prop("checked")) server.post("oauth/enable");
-    else server.post("oauth/disable");
+    if (this.$oAuthEnabledCheckbox.prop("checked")){
+       server.post("oauth/enable");
+    }
+    else{ 
+      server.post("oauth/disable");
+    }
   }
 
   async setRecoveryKeys() {

@@ -6,8 +6,12 @@ function generateTOTPSecret() {
 }
 
 function getTotpEnabled() {
-    if (process.env.TOTP_ENABLED === undefined) return false;
-    if (process.env.TOTP_ENABLED.toLocaleLowerCase() !== 'true') return false;
+    if (process.env.TOTP_ENABLED === undefined) {
+        return false;
+    }
+    if (process.env.TOTP_ENABLED.toLocaleLowerCase() !== 'true') {
+        return false;
+    }
 
     return true;
 }
@@ -18,7 +22,9 @@ function getTOTPStatus() {
 }
 
 function enableTOTP() {
-    if (!getTotpEnabled()) return {success: 'false'};
+    if (!getTotpEnabled()) {
+        return {success: 'false'};
+    }
 
     options.setOption('totpEnabled', true);
     options.setOption('oAuthEnabled', false);
