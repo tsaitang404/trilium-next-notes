@@ -17,17 +17,28 @@ function getPasswordDerivedKey(password: crypto.BinaryLike) {
   return getScryptHash(password, salt);
 }
 
-function getScryptHash(password: crypto.BinaryLike, salt: string | crypto.BinaryLike) {
-  const hashed = crypto.scryptSync(password, salt instanceof String ? utils.toBase64(salt.toString()) : salt, 32, {
-    N: 16384,
-    r: 8,
-    p: 1,
-  });
+function getScryptHash(
+  password: crypto.BinaryLike,
+  salt: string | crypto.BinaryLike
+) {
+  const hashed = crypto.scryptSync(
+    password,
+    salt instanceof String ? utils.toBase64(salt.toString()) : salt,
+    32,
+    {
+      N: 16384,
+      r: 8,
+      p: 1,
+    }
+  );
 
   return hashed;
 }
 
-function getSubjectIdentifierVerificationHash(guessedUserId: string | crypto.BinaryLike, salt?: string) {
+function getSubjectIdentifierVerificationHash(
+  guessedUserId: string | crypto.BinaryLike,
+  salt?: string
+) {
   if (salt != null) return getScryptHash(guessedUserId, salt);
 
   const savedSalt = sql.getValue("SELECT salt FROM user_data;");
@@ -38,14 +49,24 @@ function getSubjectIdentifierVerificationHash(guessedUserId: string | crypto.Bin
   return getScryptHash(guessedUserId, savedSalt.toString());
 }
 
-function getSubjectIdentifierDerivedKey(subjectIdentifer: crypto.BinaryLike) {
+function getSubjectIdentifierDerivedKey(
+  subjectIdentifer: crypto.BinaryLike,
+  givenSalt?: string
+) {
+  if (givenSalt !== undefined) {
+    return getScryptHash(subjectIdentifer, givenSalt.toString());
+  }
+
   const salt = sql.getValue("SELECT salt FROM user_data;");
   if (salt === undefined || salt === null) return undefined;
 
   return getScryptHash(subjectIdentifer, salt.toString());
 }
 
-function createSubjectIdentifierDerivedKey(subjectIdentifer: string | crypto.BinaryLike, salt: string | crypto.BinaryLike) {
+function createSubjectIdentifierDerivedKey(
+  subjectIdentifer: string | crypto.BinaryLike,
+  salt: string | crypto.BinaryLike
+) {
   // const salt = optionService.getOption("subjectIdentifierDerivedKeySalt");
 
   //   const salt = sql.getValue("SELECT salt FROM user_data");

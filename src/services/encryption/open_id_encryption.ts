@@ -8,16 +8,37 @@ import sqlInit = require("../sql_init");
 function saveSubjectIdentifier(subjectIdentifier: string) {
   if (isUserSaved()) return false;
 
+  // Allows setup with existing instances of trilium
+  sql.execute(`
+    CREATE TABLE IF NOT EXISTS "user_data"
+    (
+        tmpID INT,
+        userIDEcnryptedDataKey TEXT,
+        userIDVerificationHash TEXT,
+        salt TEXT,
+        derivedKey TEXT,
+        isSetup TEXT DEFAULT "false",
+        UNIQUE (tmpID),
+        PRIMARY KEY (tmpID)
+    );`);
+
   const verificationSalt = utils.randomSecureToken(32);
   const derivedKeySalt = utils.randomSecureToken(32);
 
-  const verificationHash = myScryptService.getSubjectIdentifierVerificationHash(subjectIdentifier, verificationSalt);
+  const verificationHash = myScryptService.getSubjectIdentifierVerificationHash(
+    subjectIdentifier,
+    verificationSalt
+  );
   if (verificationHash === undefined) {
     console.log("Verification hash undefined!");
     return undefined;
   }
 
-  const userIDEncryptedDataKey = setDataKey(subjectIdentifier, utils.randomSecureToken(16));
+  const userIDEncryptedDataKey = setDataKey(
+    subjectIdentifier,
+    utils.randomSecureToken(16),
+    verificationSalt
+  );
 
   if (userIDEncryptedDataKey === undefined || userIDEncryptedDataKey === null) {
     console.log("USERID ENCRYPTED DATA KEY NULL");
@@ -66,13 +87,17 @@ function verifyOpenIDSubjectIdentifier(subjectIdentifier: string) {
     return undefined;
   }
 
-  const givenHash = myScryptService.getSubjectIdentifierVerificationHash(subjectIdentifier)?.toString("base64");
+  const givenHash = myScryptService
+    .getSubjectIdentifierVerificationHash(subjectIdentifier)
+    ?.toString("base64");
   if (givenHash === undefined) {
     console.log("Sub id hash undefined!");
     return undefined;
   }
 
-  const savedHash = sql.getValue("SELECT userIDVerificationHash FROM user_data");
+  const savedHash = sql.getValue(
+    "SELECT userIDVerificationHash FROM user_data"
+  );
   if (savedHash === undefined) {
     console.log("verification hash undefined");
     return undefined;
@@ -82,22 +107,35 @@ function verifyOpenIDSubjectIdentifier(subjectIdentifier: string) {
   return givenHash === savedHash;
 }
 
-function setDataKey(subjectIdentifier: string, plainTextDataKey: string | Buffer) {
-  const subjectIdentifierDerivedKey = myScryptService.getSubjectIdentifierDerivedKey(subjectIdentifier);
+function setDataKey(
+  subjectIdentifier: string,
+  plainTextDataKey: string | Buffer,
+  salt: string
+) {
+  console.log("Subject Identifier: " + subjectIdentifier);
+  const subjectIdentifierDerivedKey =
+    myScryptService.getSubjectIdentifierDerivedKey(subjectIdentifier, salt);
 
   if (subjectIdentifierDerivedKey === undefined) {
     console.log("SOMETHING WENT WRONG SAVING USER ID DERIVED KEY");
     return undefined;
   }
-  const newEncryptedDataKey = dataEncryptionService.encrypt(subjectIdentifierDerivedKey, plainTextDataKey);
+  const newEncryptedDataKey = dataEncryptionService.encrypt(
+    subjectIdentifierDerivedKey,
+    plainTextDataKey
+  );
 
   return newEncryptedDataKey;
 }
 
 function getDataKey(subjectIdentifier: string) {
-  const subjectIdentifierDerivedKey = myScryptService.getSubjectIdentifierDerivedKey(subjectIdentifier);
+  console.log("Subject Identifier: " + subjectIdentifier);
+  const subjectIdentifierDerivedKey =
+    myScryptService.getSubjectIdentifierDerivedKey(subjectIdentifier);
 
-  const encryptedDataKey = sql.getValue("SELECT userIDEcnryptedDataKey FROM user_data");
+  const encryptedDataKey = sql.getValue(
+    "SELECT userIDEcnryptedDataKey FROM user_data"
+  );
 
   if (encryptedDataKey === undefined || encryptedDataKey === null) {
     console.log("Encrypted data key empty!");
@@ -108,7 +146,10 @@ function getDataKey(subjectIdentifier: string) {
     console.log("SOMETHING WENT WRONG SAVING USER ID DERIVED KEY");
     return undefined;
   }
-  const decryptedDataKey = dataEncryptionService.decrypt(subjectIdentifierDerivedKey, encryptedDataKey.toString());
+  const decryptedDataKey = dataEncryptionService.decrypt(
+    subjectIdentifierDerivedKey,
+    encryptedDataKey.toString()
+  );
 
   return decryptedDataKey;
 }
