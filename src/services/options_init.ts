@@ -1,10 +1,10 @@
-import optionService = require('./options');
-import appInfo = require('./app_info');
-import utils = require('./utils');
-import log = require('./log');
-import dateUtils = require('./date_utils');
-import keyboardActions = require('./keyboard_actions');
-import { KeyboardShortcutWithRequiredActionName } from './keyboard_actions_interface';
+import optionService from "./options.js";
+import appInfo from "./app_info.js";
+import utils from "./utils.js";
+import log from "./log.js";
+import dateUtils from "./date_utils.js";
+import keyboardActions from "./keyboard_actions.js";
+import { KeyboardShortcutWithRequiredActionName } from './keyboard_actions_interface.js';
 
 function initDocumentOptions() {
     optionService.createOption('documentId', utils.randomSecureToken(16), false);
@@ -16,7 +16,7 @@ interface NotSyncedOpts {
     syncProxy?: string;
 }
 
-function initNotSyncedOptions(initialized: boolean, opts: NotSyncedOpts = {}) {
+async function initNotSyncedOptions(initialized: boolean, theme: string, opts: NotSyncedOpts = {}) {
     optionService.createOption('openNoteContexts', JSON.stringify([
         {
             notePath: 'root',
@@ -32,15 +32,7 @@ function initNotSyncedOptions(initialized: boolean, opts: NotSyncedOpts = {}) {
     optionService.createOption('initialized', initialized ? 'true' : 'false', false);
 
     optionService.createOption('lastSyncedPull', '0', false);
-    optionService.createOption('lastSyncedPush', '0', false);
-
-    let theme = 'dark'; // default based on the poll in https://github.com/zadam/trilium/issues/2516
-
-    if (utils.isElectron()) {
-        const {nativeTheme} = require('electron');
-
-        theme = nativeTheme.shouldUseDarkColors ? 'dark' : 'light';
-    }
+    optionService.createOption('lastSyncedPush', '0', false);    
 
     optionService.createOption('theme', theme, false);
 
@@ -136,7 +128,7 @@ function getKeyboardDefaultOptions() {
         }));
 }
 
-export = {
+export default {
     initDocumentOptions,
     initNotSyncedOptions,
     initStartupOptions

@@ -28,7 +28,7 @@ const TPL = `
         <div style="display: flex; justify-content: space-between;">
             <button class="btn btn-primary">Save</button>
     
-            <button class="btn" type="button" data-help-page="Synchronization">Help</button>
+            <button class="btn" type="button" data-help-page="synchronization.html">Help</button>
         </div>
     </form>
 </div>

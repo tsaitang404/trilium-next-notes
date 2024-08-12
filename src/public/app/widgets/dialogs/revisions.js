@@ -45,7 +45,7 @@ const TPL = `
                         title="Delete all revisions of this note"
                         style="padding: 0 10px 0 10px;" type="button">Delete all revisions</button>
 
-                <button class="help-button" type="button" data-help-page="Note-revisions" title="Help on Note revisions">?</button>
+                <button class="help-button" type="button" data-help-page="note-revisions.html" title="Help on Note revisions">?</button>
 
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="margin-left: 0 !important;">
                     <span aria-hidden="true">&times;</span>

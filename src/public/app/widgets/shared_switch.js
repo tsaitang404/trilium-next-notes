@@ -20,7 +20,7 @@ export default class SharedSwitchWidget extends SwitchWidget {
         this.$switchOffName.text("Shared");
         this.$switchOffButton.attr("title", "Unshare the note");
 
-        this.$helpButton.attr("data-help-page", "Sharing").show();
+        this.$helpButton.attr("data-help-page", "sharing.html").show();
         this.$helpButton.on('click', e => utils.openHelp($(e.target)));
     }
 

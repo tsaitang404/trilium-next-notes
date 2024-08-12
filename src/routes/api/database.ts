@@ -1,12 +1,12 @@
 "use strict";
 
-import sql = require('../../services/sql');
-import log = require('../../services/log');
-import backupService = require('../../services/backup');
-import anonymizationService = require('../../services/anonymization');
-import consistencyChecksService = require('../../services/consistency_checks');
+import sql from "../../services/sql.js";
+import log from "../../services/log.js";
+import backupService from "../../services/backup.js";
+import anonymizationService from "../../services/anonymization.js";
+import consistencyChecksService from "../../services/consistency_checks.js";
 import { Request } from 'express';
-import ValidationError = require('../../errors/validation_error');
+import ValidationError from "../../errors/validation_error.js";
 
 function getExistingBackups() {
     return backupService.getExistingBackups();
@@ -49,7 +49,7 @@ function checkIntegrity() {
     };
 }
 
-export = {
+export default {
     getExistingBackups,
     backupDatabase,
     vacuumDatabase,

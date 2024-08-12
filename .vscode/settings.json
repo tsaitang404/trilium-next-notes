@@ -1,5 +1,18 @@
 {
     "editor.formatOnSave": false,
-    "files.eol": "\n",
     "typescript.tsdk": "node_modules/typescript/lib"
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "files.eol": "\n",
+    "typescript.tsdk": "node_modules/typescript/lib",
+    "i18n-ally.sourceLanguage": "en",
+    "i18n-ally.keystyle": "nested",
+    "i18n-ally.localesPaths": [
+        "./src/public/translations"
+    ],
+    "[jsonc]": {
+        "editor.defaultFormatter": "vscode.json-language-features"
+    },
+    "[javascript]": {
+        "editor.defaultFormatter": "vscode.typescript-language-features"
+    },
 }

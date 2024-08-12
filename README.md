@@ -23,25 +23,25 @@ Feel free to join our official conversations. We would love to hear what feature
 
 ## 🎁 Features
 
-- Notes can be arranged into arbitrarily deep tree. Single note can be placed into multiple places in the tree (see [cloning](https://triliumnext.github.io/Docs/Wiki/cloning-notes)
-- Rich WYSIWYG note editing including e.g. tables, images and [math](https://triliumnext.github.io/Docs/Wiki/text-notes) with markdown [autoformat](https://triliumnext.github.io/Docs/Wiki/text-notes#autoformat)
-- Support for editing [notes with source code](https://triliumnext.github.io/Docs/Wiki/code-notes), including syntax highlighting
-- Fast and easy [navigation between notes](https://triliumnext.github.io/Docs/Wiki/note-navigation), full text search and [note hoisting](https://triliumnext.github.io/Docs/Wiki/note-hoisting)
-- Seamless [note versioning](https://triliumnext.github.io/Docs/Wiki/note-revisions)
-- Note [attributes](https://triliumnext.github.io/Docs/Wiki/attributes) can be used for note organization, querying and advanced [scripting](https://triliumnext.github.io/Docs/Wiki/scripts)
-- [Synchronization](https://triliumnext.github.io/Docs/Wiki/synchronization) with self-hosted sync server
-  - there's a [3rd party service for hosting synchronisation server](https://trilium.cc/paid-hosting)
-- [Sharing](https://triliumnext.github.io/Docs/Wiki/sharing) (publishing) notes to public internet
-- Strong [note encryption](https://triliumnext.github.io/Docs/Wiki/protected-notes) with per-note granularity
-- Sketching diagrams with built-in Excalidraw (note type "canvas")
-- [Relation maps](https://triliumnext.github.io/Docs/Wiki/relation-map) and [link maps](https://triliumnext.github.io/Docs/Wiki/link-map) for visualizing notes and their relations
-- [Scripting](https://triliumnext.github.io/Docs/Wiki/scripts) - see [Advanced showcases](https://triliumnext.github.io/Docs/Wiki/advanced-showcases)
-- [REST API](https://triliumnext.github.io/Docs/Wiki/etapi) for automation
-- Scales well in both usability and performance upwards of 100 000 notes
-- Touch optimized [mobile frontend](https://triliumnext.github.io/Docs/Wiki/mobile-frontend) for smartphones and tablets
-- [Night theme](https://triliumnext.github.io/Docs/Wiki/themes)
-- [Evernote](https://triliumnext.github.io/Docs/Wiki/evernote-import) and [Markdown import & export](https://triliumnext.github.io/Docs/Wiki/markdown)
-- [Web Clipper](https://triliumnext.github.io/Docs/Wiki/web-clipper) for easy saving of web content
+* Notes can be arranged into arbitrarily deep tree. Single note can be placed into multiple places in the tree (see [cloning](https://triliumnext.github.io/Docs/Wiki/cloning-notes)
+* Rich WYSIWYG note editing including e.g. tables, images and [math](https://triliumnext.github.io/Docs/Wiki/text-notes) with markdown [autoformat](https://triliumnext.github.io/Docs/Wiki/text-notes#autoformat)
+* Support for editing [notes with source code](https://triliumnext.github.io/Docs/Wiki/code-notes), including syntax highlighting
+* Fast and easy [navigation between notes](https://triliumnext.github.io/Docs/Wiki/note-navigation), full text search and [note hoisting](https://triliumnext.github.io/Docs/Wiki/note-hoisting)
+* Seamless [note versioning](https://triliumnext.github.io/Docs/Wiki/note-revisions)
+* Note [attributes](https://triliumnext.github.io/Docs/Wiki/attributes) can be used for note organization, querying and advanced [scripting](https://triliumnext.github.io/Docs/Wiki/scripts)
+* [Synchronization](https://triliumnext.github.io/Docs/Wiki/synchronization) with self-hosted sync server
+  * there's a [3rd party service for hosting synchronisation server](https://trilium.cc/paid-hosting)
+* [Sharing](https://triliumnext.github.io/Docs/Wiki/sharing) (publishing) notes to public internet
+* Strong [note encryption](https://triliumnext.github.io/Docs/Wiki/protected-notes) with per-note granularity
+* Sketching diagrams with built-in Excalidraw (note type "canvas")
+* [Relation maps](https://triliumnext.github.io/Docs/Wiki/relation-map) and [link maps](https://triliumnext.github.io/Docs/Wiki/link-map) for visualizing notes and their relations
+* [Scripting](https://triliumnext.github.io/Docs/Wiki/scripts) - see [Advanced showcases](https://triliumnext.github.io/Docs/Wiki/advanced-showcases)
+* [REST API](https://triliumnext.github.io/Docs/Wiki/etapi) for automation
+* Scales well in both usability and performance upwards of 100 000 notes
+* Touch optimized [mobile frontend](https://triliumnext.github.io/Docs/Wiki/mobile-frontend) for smartphones and tablets
+* [Night theme](https://triliumnext.github.io/Docs/Wiki/themes)
+* [Evernote](https://triliumnext.github.io/Docs/Wiki/evernote-import) and [Markdown import & export](https://triliumnext.github.io/Docs/Wiki/markdown)
+* [Web Clipper](https://triliumnext.github.io/Docs/Wiki/web-clipper) for easy saving of web content
 
 ✨ Check out the following third-party resources/communities for more TriliumNext related goodies:
 
@@ -54,17 +54,29 @@ Feel free to join our official conversations. We would love to hear what feature
 
 To use TriliumNext on your desktop machine (Linux, MacOS, and Windows) you have a few options:
 
+<<<<<<< HEAD
 - Download the binary release for your platform from the [latest release page](https://github.com/TriliumNext/Notes/releases/latest), unzip the package and run the `trilium` executable.
 - Access TriliumNext via the web interface of a server installation (see below)
   - Currently only the latest versions of Chrome & Firefox are supported (and tested).
 - (Coming Soon) TriliumNext will also be provided as a Flatpak
+=======
+* Download the binary release for your platform from the [latest release page](https://github.com/TriliumNext/Notes/releases/latest), unzip the package and run the ```trilium``` executable.
+* Access TriliumNext via the web interface of a server installation (see below)
+    * Currently only the latest versions of Chrome & Firefox are supported (and tested).
+* (Coming Soon) TriliumNext will also be provided as a Flatpak
+>>>>>>> develop
 
 ### Mobile
 
 To use TriliumNext on a mobile device:
 
+<<<<<<< HEAD
 - Use a mobile web browser to access the mobile interface of a server installation (see below)
 - Use of a mobile app is not yet supported ([see here](https://github.com/TriliumNext/Notes/issues/72)) to track mobile improvements.
+=======
+* Use a mobile web browser to access the mobile interface of a server installation (see below)
+* Use of a mobile app is not yet supported ([see here](https://github.com/TriliumNext/Notes/issues/72)) to track mobile improvements.
+>>>>>>> develop
 
 ### Server
 
@@ -79,7 +91,10 @@ You can also read [Patterns of personal knowledge base](https://triliumnext.gith
 ## 💻 Contribute
 
 Clone locally and run
+<<<<<<< HEAD
 
+=======
+>>>>>>> develop
 ```
 npm install
 npm run start-server
@@ -87,10 +102,17 @@ npm run start-server
 
 ## 👏 Shoutouts
 
+<<<<<<< HEAD
 - [CKEditor 5](https://github.com/ckeditor/ckeditor5) - best WYSIWYG editor on the market, very interactive and listening team
 - [FancyTree](https://github.com/mar10/fancytree) - very feature rich tree library without real competition. TriliumNext Notes would not be the same without it.
 - [CodeMirror](https://github.com/codemirror/CodeMirror) - code editor with support for huge amount of languages
 - [jsPlumb](https://github.com/jsplumb/jsplumb) - visual connectivity library without competition. Used in [relation maps](https://triliumnext.github.io/Docs/Wiki/Relation-map) and [link maps](https://triliumnext.github.io/Docs/Wiki/Link-map)
+=======
+* [CKEditor 5](https://github.com/ckeditor/ckeditor5) - best WYSIWYG editor on the market, very interactive and listening team
+* [FancyTree](https://github.com/mar10/fancytree) - very feature rich tree library without real competition. TriliumNext Notes would not be the same without it.
+* [CodeMirror](https://github.com/codemirror/CodeMirror) - code editor with support for huge amount of languages
+* [jsPlumb](https://github.com/jsplumb/jsplumb) - visual connectivity library without competition. Used in [relation maps](https://triliumnext.github.io/Docs/Wiki/Relation-map) and [link maps](https://triliumnext.github.io/Docs/Wiki/Link-map)
+>>>>>>> develop
 
 ## 🤝 Support
 

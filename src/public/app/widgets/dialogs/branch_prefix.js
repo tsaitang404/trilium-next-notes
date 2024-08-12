@@ -15,7 +15,7 @@ const TPL = `<div class="branch-prefix-dialog modal fade mx-auto" tabindex="-1" 
                 <div class="modal-header">
                     <h5 class="modal-title mr-auto">Edit branch prefix</h5>
 
-                    <button class="help-button" type="button" data-help-page="Tree-concepts#prefix" title="Help on Tree prefix">?</button>
+                    <button class="help-button" type="button" data-help-page="tree-concepts.html#prefix" title="Help on Tree prefix">?</button>
 
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="margin-left: 0;">
                         <span aria-hidden="true">&times;</span>

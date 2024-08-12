@@ -1,9 +1,9 @@
 'use strict';
 
-import utils = require('../services/utils');
-import multer = require('multer');
-import log = require('../services/log');
-import express = require('express');
+import utils from "../services/utils.js";
+import multer from "multer";
+import log from "../services/log.js";
+import express from "express";
 const router = express.Router();
 import auth = require('../services/auth');
 import openID = require('../services/open_id');
@@ -20,60 +20,60 @@ import NotFoundError = require('../errors/not_found_error');
 import ValidationError = require('../errors/validation_error');
 
 // page routes
-import setupRoute = require('./setup');
-import loginRoute = require('./login');
-import indexRoute = require('./index');
+import setupRoute from "./setup.js";
+import loginRoute from "./login.js";
+import indexRoute from "./index.js";
 
 // API routes
-import treeApiRoute = require('./api/tree');
-import notesApiRoute = require('./api/notes');
-import branchesApiRoute = require('./api/branches');
-import attachmentsApiRoute = require('./api/attachments');
-import autocompleteApiRoute = require('./api/autocomplete');
-import cloningApiRoute = require('./api/cloning');
-import revisionsApiRoute = require('./api/revisions');
-import recentChangesApiRoute = require('./api/recent_changes');
-import optionsApiRoute = require('./api/options');
-import passwordApiRoute = require('./api/password');
-import syncApiRoute = require('./api/sync');
-import loginApiRoute = require('./api/login');
-import recentNotesRoute = require('./api/recent_notes');
-import appInfoRoute = require('./api/app_info');
-import exportRoute = require('./api/export');
-import importRoute = require('./api/import');
-import setupApiRoute = require('./api/setup');
-import sqlRoute = require('./api/sql');
-import databaseRoute = require('./api/database');
-import imageRoute = require('./api/image');
-import attributesRoute = require('./api/attributes');
-import scriptRoute = require('./api/script');
-import senderRoute = require('./api/sender');
-import filesRoute = require('./api/files');
-import searchRoute = require('./api/search');
-import bulkActionRoute = require('./api/bulk_action');
-import specialNotesRoute = require('./api/special_notes');
-import noteMapRoute = require('./api/note_map');
-import clipperRoute = require('./api/clipper');
-import similarNotesRoute = require('./api/similar_notes');
-import keysRoute = require('./api/keys');
-import backendLogRoute = require('./api/backend_log');
-import statsRoute = require('./api/stats');
-import fontsRoute = require('./api/fonts');
-import etapiTokensApiRoutes = require('./api/etapi_tokens');
-import relationMapApiRoute = require('./api/relation-map');
-import otherRoute = require('./api/other');
-import shareRoutes = require('../share/routes');
+import treeApiRoute from "./api/tree.js";
+import notesApiRoute from "./api/notes.js";
+import branchesApiRoute from "./api/branches.js";
+import attachmentsApiRoute from "./api/attachments.js";
+import autocompleteApiRoute from "./api/autocomplete.js";
+import cloningApiRoute from "./api/cloning.js";
+import revisionsApiRoute from "./api/revisions.js";
+import recentChangesApiRoute from "./api/recent_changes.js";
+import optionsApiRoute from "./api/options.js";
+import passwordApiRoute from "./api/password.js";
+import syncApiRoute from "./api/sync.js";
+import loginApiRoute from "./api/login.js";
+import recentNotesRoute from "./api/recent_notes.js";
+import appInfoRoute from "./api/app_info.js";
+import exportRoute from "./api/export.js";
+import importRoute from "./api/import.js";
+import setupApiRoute from "./api/setup.js";
+import sqlRoute from "./api/sql.js";
+import databaseRoute from "./api/database.js";
+import imageRoute from "./api/image.js";
+import attributesRoute from "./api/attributes.js";
+import scriptRoute from "./api/script.js";
+import senderRoute from "./api/sender.js";
+import filesRoute from "./api/files.js";
+import searchRoute from "./api/search.js";
+import bulkActionRoute from "./api/bulk_action.js";
+import specialNotesRoute from "./api/special_notes.js";
+import noteMapRoute from "./api/note_map.js";
+import clipperRoute from "./api/clipper.js";
+import similarNotesRoute from "./api/similar_notes.js";
+import keysRoute from "./api/keys.js";
+import backendLogRoute from "./api/backend_log.js";
+import statsRoute from "./api/stats.js";
+import fontsRoute from "./api/fonts.js";
+import etapiTokensApiRoutes from "./api/etapi_tokens.js";
+import relationMapApiRoute from "./api/relation-map.js";
+import otherRoute from "./api/other.js";
+import shareRoutes from "../share/routes.js";
 
-import etapiAuthRoutes = require('../etapi/auth');
-import etapiAppInfoRoutes = require('../etapi/app_info');
-import etapiAttachmentRoutes = require('../etapi/attachments');
-import etapiAttributeRoutes = require('../etapi/attributes');
-import etapiBranchRoutes = require('../etapi/branches');
-import etapiNoteRoutes = require('../etapi/notes');
-import etapiSpecialNoteRoutes = require('../etapi/special_notes');
-import etapiSpecRoute = require('../etapi/spec');
-import etapiBackupRoute = require('../etapi/backup');
-import { AppRequest, AppRequestHandler } from './route-interface';
+import etapiAuthRoutes from "../etapi/auth.js";
+import etapiAppInfoRoutes from "../etapi/app_info.js";
+import etapiAttachmentRoutes from "../etapi/attachments.js";
+import etapiAttributeRoutes from "../etapi/attributes.js";
+import etapiBranchRoutes from "../etapi/branches.js";
+import etapiNoteRoutes from "../etapi/notes.js";
+import etapiSpecialNoteRoutes from "../etapi/special_notes.js";
+import etapiSpecRoute from "../etapi/spec.js";
+import etapiBackupRoute from "../etapi/backup.js";
+import { AppRequest, AppRequestHandler } from './route-interface.js';
 
 const csrfMiddleware = csurf({
   cookie: {
@@ -141,11 +141,19 @@ function register(app: express.Application) {
     loginRoute.setPasswordPage
   );
 
+<<<<<<< HEAD
   const loginRateLimiter = rateLimit.rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 10, // limit each IP to 10 requests per windowMs
     skipSuccessfulRequests: true, // successful auth to rate-limited ETAPI routes isn't counted. However, successful auth to /login is still counted!
   });
+=======
+    const loginRateLimiter = rateLimit({
+        windowMs: 15 * 60 * 1000, // 15 minutes
+        max: 10, // limit each IP to 10 requests per windowMs
+        skipSuccessfulRequests: true // successful auth to rate-limited ETAPI routes isn't counted. However, successful auth to /login is still counted!
+    });
+>>>>>>> develop
 
   route(PST, '/login', [loginRateLimiter], loginRoute.login);
   route(PST, '/logout', [csrfMiddleware, auth.checkAuth], loginRoute.logout);
@@ -1197,6 +1205,11 @@ function createUploadMiddleware() {
   return multer(multerOptions).single('upload');
 }
 
+<<<<<<< HEAD
 export = {
   register,
+=======
+export default {
+    register
+>>>>>>> develop
 };

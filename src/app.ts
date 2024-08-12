@@ -15,15 +15,20 @@ require('dotenv').config();
 
 const app = express();
 
+const scriptDir = dirname(fileURLToPath(import.meta.url));
+
+// Initialize DB
+sql_init.initializeDb();
+
 // view engine setup
-app.set('views', path.join(__dirname, 'views'));
+app.set('views', path.join(scriptDir, 'views'));
 app.set('view engine', 'ejs');
 
 if (!utils.isElectron()) {
     app.use(compression()); // HTTP compression
 }
 
-app.use(helmet.default({
+app.use(helmet({
     hidePoweredBy: false, // errors out in electron
     contentSecurityPolicy: false,
     crossOriginEmbedderPolicy: false
@@ -34,12 +39,13 @@ app.use(express.json({ limit: '500mb' }));
 app.use(express.raw({ limit: '500mb' }));
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public/root')));
-app.use(`/manifest.webmanifest`, express.static(path.join(__dirname, 'public/manifest.webmanifest')));
-app.use(`/robots.txt`, express.static(path.join(__dirname, 'public/robots.txt')));
+app.use(express.static(path.join(scriptDir, 'public/root')));
+app.use(`/manifest.webmanifest`, express.static(path.join(scriptDir, 'public/manifest.webmanifest')));
+app.use(`/robots.txt`, express.static(path.join(scriptDir, 'public/robots.txt')));
 app.use(sessionParser);
-app.use(favicon(`${__dirname}/../images/app-icons/win/icon.ico`));
+app.use(favicon(`${scriptDir}/../images/app-icons/icon.ico`));
 
+<<<<<<< HEAD
 if (openID.checkOpenIDRequirements()) 
     app.use(oidc.auth(openID.generateOAuthConfig()));
 
@@ -47,20 +53,28 @@ require('./routes/assets').register(app);
 require('./routes/routes').register(app);
 require('./routes/custom').register(app);
 require('./routes/error_handlers').register(app);
+=======
+assets.register(app);
+routes.register(app);
+custom.register(app);
+error_handlers.register(app);
+>>>>>>> develop
 
 // triggers sync timer
-require('./services/sync');
+await import("./services/sync.js");
 
 // triggers backup timer
-require('./services/backup');
+await import('./services/backup.js');
 
 // trigger consistency checks timer
-require('./services/consistency_checks');
+await import('./services/consistency_checks.js');
 
-require('./services/scheduler');
+await import('./services/scheduler.js');
+
+startScheduledCleanup();
 
 if (utils.isElectron()) {
-    require('@electron/remote/main').initialize();
+    (await import('@electron/remote/main/index.js')).initialize();
 }
 
-export = app;
+export default app;

@@ -1,0 +1,22 @@
+{
+  "about": {
+    "title": "About TriliumNext Notes",
+    "homepage": "Homepage:",
+    "app_version": "App version:",
+    "db_version": "DB version:",
+    "sync_version": "Sync version:",
+    "build_date": "Build date:",
+    "build_revision": "Build revision:",
+    "data_directory": "Data directory:"
+  },
+  "toast": {
+    "critical-error": {
+      "title": "Critical error",
+      "message": "A critical error has occurred which prevents the client application from starting:\n\n{{message}}\n\nThis is most likely caused by a script failing in an unexpected way. Try starting the application in safe mode and addressing the issue."
+    },
+    "widget-error": {
+      "title": "Failed to initialize a widget",
+      "message": "Widget with title \"{{title}}\" could not be initialized due to:\n\n{{message}}"
+    }
+  }
+}

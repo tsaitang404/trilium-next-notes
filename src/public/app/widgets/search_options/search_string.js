@@ -14,7 +14,7 @@ const TPL = `
         <div class="dropdown help-dropdown">
           <span class="bx bx-help-circle icon-action" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></span>
           <div class="dropdown-menu dropdown-menu-right p-4">
-            <strong>Search syntax</strong> - also see <button class="btn btn-sm" type="button" data-help-page="Search">complete help on search syntax</button>
+            <strong>Search syntax</strong> - also see <button class="btn btn-sm" type="button" data-help-page="search.html">complete help on search syntax</button>
             <p>
             <ul>
                 <li>Just enter any text for full text search</li>

@@ -8,7 +8,7 @@ const TPL = `
     <h4>ETAPI</h4>
     
     <p>ETAPI is a REST API used to access Trilium instance programmatically, without UI. <br/>
-       See more details on <a href="https://github.com/zadam/trilium/wiki/ETAPI">wiki</a> and <a onclick="window.open('etapi/etapi.openapi.yaml')" href="etapi/etapi.openapi.yaml">ETAPI OpenAPI spec</a>.</p>
+       See more details on <a href="https://triliumnext.github.io/Docs/Wiki/etapi.html">wiki</a> and <a onclick="window.open('etapi/etapi.openapi.yaml')" href="etapi/etapi.openapi.yaml">ETAPI OpenAPI spec</a>.</p>
     
     <button type="button" class="create-etapi-token btn btn-sm">Create new ETAPI token</button>
 

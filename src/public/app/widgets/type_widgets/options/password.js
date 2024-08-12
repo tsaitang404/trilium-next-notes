@@ -37,7 +37,7 @@ const TPL = `
     <h4>Protected Session Timeout</h4>
 
     <p>Protected session timeout is a time period after which the protected session is wiped from
-        the browser's memory. This is measured from the last interaction with protected notes. See <a href="https://github.com/zadam/trilium/wiki/Protected-notes" class="external">wiki</a> for more info.</p>
+        the browser's memory. This is measured from the last interaction with protected notes. See <a href="https://triliumnext.github.io/Docs/Wiki/protected-notes.html" class="external">wiki</a> for more info.</p>
 
     <div class="form-group">
         <label>Protected session timeout (in seconds)</label>

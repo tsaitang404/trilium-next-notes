@@ -47,7 +47,7 @@ export default class AttachmentDetailTypeWidget extends TypeWidget {
         this.$wrapper.empty();
         this.children = [];
 
-        const $helpButton = $('<button class="attachment-help-button" type="button" data-help-page="attachments" title="Open help page on attachments"><span class="bx bx-help-circle"></span></button>');
+        const $helpButton = $('<button class="attachment-help-button" type="button" data-help-page="attachments.html" title="Open help page on attachments"><span class="bx bx-help-circle"></span></button>');
         utils.initHelpButtons($helpButton);
 
         this.$linksWrapper.empty().append(

@@ -14,7 +14,7 @@ const TPL = `
             <div class="modal-header">
                 <h5 class="modal-title mr-auto">Clone notes to ...</h5>
 
-                <button type="button" class="help-button" title="Help on links" data-help-page="Cloning-notes">?</button>
+                <button type="button" class="help-button" title="Help on links" data-help-page="cloning-notes.html">?</button>
 
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="margin-left: 0 !important;">
                     <span aria-hidden="true">&times;</span>

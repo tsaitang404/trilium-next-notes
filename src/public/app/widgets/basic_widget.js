@@ -1,5 +1,6 @@
 import Component from "../components/component.js";
-
+import { t } from "../services/i18n.js";
+import toastService from "../services/toast.js";
 
 /**
  * This is the base widget for all other widgets.
@@ -81,7 +82,18 @@ class BasicWidget extends Component {
     }
 
     render() {
-        this.doRender();
+        try {
+            this.doRender();
+        } catch (e) {
+            toastService.showPersistent({
+                title: t("toast.widget-error.title"),
+                icon: "alert",
+                message: t("toast.widget-error.message", {
+                    title: this.widgetTitle,
+                    message: e.message
+                })
+            });
+        }
 
         this.$widget.attr('data-component-id', this.componentId);
         this.$widget

@@ -75,10 +75,16 @@ function createSubjectIdentifierDerivedKey(
   return getScryptHash(subjectIdentifer, salt);
 }
 
+<<<<<<< HEAD
 export = {
   getVerificationHash,
   getPasswordDerivedKey,
   getSubjectIdentifierVerificationHash,
   getSubjectIdentifierDerivedKey,
   createSubjectIdentifierDerivedKey,
+=======
+export default {
+    getVerificationHash,
+    getPasswordDerivedKey
+>>>>>>> develop
 };

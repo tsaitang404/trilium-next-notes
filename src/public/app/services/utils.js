@@ -330,7 +330,7 @@ function initHelpDropdown($el) {
     initHelpButtons($dropdownMenu);
 }
 
-const wikiBaseUrl = "https://github.com/zadam/trilium/wiki/";
+const wikiBaseUrl = "https://triliumnext.github.io/Docs/Wiki/";
 
 function openHelp($button) {
     const helpPage = $button.attr("data-help-page");
@@ -371,10 +371,10 @@ function escapeRegExp(str) {
     return str.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
 }
 
-function areObjectsEqual () {
+function areObjectsEqual() {
     let i, l, leftChain, rightChain;
 
-    function compare2Objects (x, y) {
+    function compare2Objects(x, y) {
         let p;
 
         // remember that NaN === NaN returns false
@@ -449,7 +449,7 @@ function areObjectsEqual () {
                     leftChain.push(x);
                     rightChain.push(y);
 
-                    if (!compare2Objects (x[p], y[p])) {
+                    if (!compare2Objects(x[p], y[p])) {
                         return false;
                     }
 

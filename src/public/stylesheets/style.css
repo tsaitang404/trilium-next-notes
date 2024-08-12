@@ -686,6 +686,10 @@ a.external:not(.no-arrow):after, a[href^="http://"]:not(.no-arrow):after, a[href
     color: var(--main-text-color) !important;
 }
 
+.toast-body {
+    white-space: preserve-breaks;
+}
+
 .ck-mentions .ck-button {
     font-size: var(--detail-font-size) !important;
     padding: 5px;

@@ -190,8 +190,9 @@ const ATTR_HELP = {
         "excludeFromExport": "notes (with their sub-tree) won't be included in any note export",
         "run": `defines on which events script should run. Possible values are:
                 <ul>
-                    <li>frontendStartup - when Trilium frontend starts up (or is refreshed).</li>
-                    <li>backendStartup - when Trilium backend starts up</li>
+                    <li>frontendStartup - when Trilium frontend starts up (or is refreshed), but not on mobile.</li>
+                    <li>mobileStartup - when Trilium frontend starts up (or is refreshed), on mobile.</li>
+                    <li>backendStartup - when Trilium backend starts up.</li>
                     <li>hourly - run once an hour. You can use additional label <code>runAtHour</code> to specify at which hour.</li>
                     <li>daily - run once a day</li>
                 </ul>`,
@@ -210,8 +211,8 @@ const ATTR_HELP = {
         "cssClass": "value of this label is then added as CSS class to the node representing given note in the tree. This can be useful for advanced theming. Can be used in template notes.",
         "iconClass": "value of this label is added as a CSS class to the icon on the tree which can help visually distinguish the notes in the tree. Example might be bx bx-home - icons are taken from boxicons. Can be used in template notes.",
         "pageSize": "number of items per page in note listing",
-        "customRequestHandler": 'see <a href="javascript:" data-help-page="Custom request handler">Custom request handler</a>',
-        "customResourceProvider": 'see <a href="javascript:" data-help-page="Custom request handler">Custom request handler</a>',
+        "customRequestHandler": 'see <a href="javascript:" data-help-page="custom-request-handler.html">Custom request handler</a>',
+        "customResourceProvider": 'see <a href="javascript:" data-help-page="custom-request-handler.html">Custom request handler</a>',
         "widget": "marks this note as a custom widget which will be added to the Trilium component tree",
         "workspace": "marks this note as a workspace which allows easy hoisting",
         "workspaceIconClass": "defines box icon CSS class which will be used in tab when hoisted to this note",
@@ -244,7 +245,7 @@ const ATTR_HELP = {
                             <li><code>Log for \${now.format('YYYY-MM-DD HH:mm:ss')}</code></li>
                         </ul>
                         
-                        See <a href="https://github.com/zadam/trilium/wiki/Default-note-title">wiki with details</a>, API docs for <a href="https://zadam.github.io/trilium/backend_api/Note.html">parentNote</a> and <a href="https://day.js.org/docs/en/display/format">now</a> for details.`,
+                        See <a href="https://triliumnext.github.io/Docs/Wiki/default-note-title.html">wiki with details</a>, API docs for <a href="https://zadam.github.io/trilium/backend_api/Note.html">parentNote</a> and <a href="https://day.js.org/docs/en/display/format">now</a> for details.`,
         "template": "This note will appear in the selection of available template when creating new note",
         "toc": "<code>#toc</code> or <code>#toc=show</code> will force the Table of Contents to be shown, <code>#toc=hide</code> will force hiding it. If the label doesn't exist, the global setting is observed",
         "color": "defines color of the note in note tree, links etc. Use any valid CSS color value like 'red' or #a13d5f",

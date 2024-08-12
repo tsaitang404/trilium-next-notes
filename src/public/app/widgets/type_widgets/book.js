@@ -13,7 +13,7 @@ const TPL = `
     </style>
 
     <div class="note-detail-book-empty-help alert alert-warning" style="margin: 50px; padding: 20px;">
-        This note of type Book doesn't have any child notes so there's nothing to display. See <a href="https://github.com/zadam/trilium/wiki/Book-note">wiki</a> for details.
+        This note of type Book doesn't have any child notes so there's nothing to display. See <a href="https://triliumnext.github.io/Docs/Wiki/book-note.html">wiki</a> for details.
     </div>
 </div>`;
 

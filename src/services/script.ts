@@ -1,9 +1,9 @@
-import ScriptContext = require('./script_context');
-import cls = require('./cls');
-import log = require('./log');
-import becca = require('../becca/becca');
-import BNote = require('../becca/entities/bnote');
-import { ApiParams } from './backend_script_api_interface';
+import ScriptContext from "./script_context.js";
+import cls from "./cls.js";
+import log from "./log.js";
+import becca from "../becca/becca.js";
+import BNote from "../becca/entities/bnote.js";
+import { ApiParams } from './backend_script_api_interface.js';
 
 interface Bundle {
     note?: BNote;
@@ -95,15 +95,11 @@ function executeScript(script: string, params: ScriptParams, startNoteId: string
         throw new Error("Unable to determine script bundle.");
     }
 
-    if (!startNote || !originEntity) {
-        throw new Error("Missing start note or origin entity.");
-    }
-
     return executeBundle(bundle, { startNote, originEntity });
 }
 
 function execute(ctx: ScriptContext, script: string) {
-    return function () { return eval(`const apiContext = this;\r\n(${script}\r\n)()`); }.call(ctx);
+    return function () { return (0, eval)(`const apiContext = this;\r\n(${script}\r\n)()`); }.call(ctx);
 }
 
 function getParams(params?: ScriptParams) {
@@ -219,7 +215,7 @@ function sanitizeVariableName(str: string) {
     return str.replace(/[^a-z0-9_]/gim, "");
 }
 
-export = {
+export default {
     executeNote,
     executeNoteNoException,
     executeScript,

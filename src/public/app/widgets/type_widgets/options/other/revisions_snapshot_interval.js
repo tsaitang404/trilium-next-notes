@@ -4,7 +4,7 @@ const TPL = `
 <div class="options-section">
     <h4>Note Revisions Snapshot Interval</h4>
 
-    <p>Note revision snapshot time interval is time in seconds after which a new note revision will be created for the note. See <a href="https://github.com/zadam/trilium/wiki/Note-revisions" class="external">wiki</a> for more info.</p>
+    <p>Note revision snapshot time interval is time in seconds after which a new note revision will be created for the note. See <a href="https://triliumnext.github.io/Docs/Wiki/note-revisions.html" class="external">wiki</a> for more info.</p>
 
     <div class="form-group">
         <label>Note revision snapshot time interval (in seconds)</label>

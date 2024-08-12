@@ -143,10 +143,19 @@ function logout(req: AppRequest, res: Response) {
   });
 }
 
+<<<<<<< HEAD
 export = {
   loginPage,
   setPasswordPage,
   setPassword,
   login,
   logout,
+=======
+export default {
+    loginPage,
+    setPasswordPage,
+    setPassword,
+    login,
+    logout
+>>>>>>> develop
 };
