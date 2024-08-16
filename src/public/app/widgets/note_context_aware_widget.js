@@ -57,7 +57,17 @@ class NoteContextAwareWidget extends BasicWidget {
     async refresh() {
         if (this.isEnabled()) {
             this.toggleInt(true);
-            await this.refreshWithNote(this.note);
+
+            try {
+                await this.refreshWithNote(this.note);
+            } catch (e) {
+                // Ignore errors when user is refreshing or navigating away.
+                if (e === "rejected by browser") {
+                    return;
+                }
+
+                throw e;
+            }
         }
         else {
             this.toggleInt(false);

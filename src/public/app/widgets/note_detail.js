@@ -273,7 +273,7 @@ export default class NoteDetailWidget extends NoteContextAwareWidget {
             loadCSS: [
                 `${assetPath}/libraries/codemirror/codemirror.css`,
                 `${assetPath}/libraries/ckeditor/ckeditor-content.css`,
-                `${assetPath}/libraries/bootstrap/css/bootstrap.min.css`,
+                `${assetPath}/node_modules/bootstrap/dist/css/bootstrap.min.css`,
                 `${assetPath}/node_modules/katex/dist/katex.min.css`,
                 `${assetPath}/stylesheets/print.css`,
                 `${assetPath}/stylesheets/relation_map.css`,

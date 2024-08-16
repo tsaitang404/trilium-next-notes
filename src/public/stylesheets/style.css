@@ -623,6 +623,10 @@ div[data-notify="container"] {
     background-color: var(--accented-background-color) !important;
 }
 
+.ck-content li p {
+    margin: 0 !important;
+}
+
 #options-dialog input[type=number] {
     text-align: right;
 }
@@ -833,18 +837,24 @@ body {
     scrollbar-color: var(--scrollbar-background-color) var(--main-background-color);
 }
 
-::-webkit-scrollbar {
-    width: 12px;
-}
+@supports selector(::-webkit-scrollbar) {
+    body {
+        scrollbar-color: unset;
+    }
 
-::-webkit-scrollbar-thumb {
-    border-radius: 5px;
-    border: 1px solid var(--scrollbar-border-color);
-    background-color: var(--scrollbar-background-color);
-}
-
-::-webkit-scrollbar-corner {
-    background-color: inherit;
+    ::-webkit-scrollbar {
+        width: 12px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        border-radius: 5px;
+        border: 1px solid var(--scrollbar-border-color);
+        background-color: var(--scrollbar-background-color);
+    }
+    
+    ::-webkit-scrollbar-corner {
+        background-color: inherit;
+    }
 }
 
 [data-toggle="tooltip"]:not(.button-widget) span {

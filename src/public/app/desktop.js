@@ -6,11 +6,15 @@ import toastService from "./services/toast.js";
 import noteAutocompleteService from './services/note_autocomplete.js';
 import macInit from './services/mac_init.js';
 import electronContextMenu from "./menus/electron_context_menu.js";
-import DesktopLayout from "./layouts/desktop_layout.js";
 import glob from "./services/glob.js";
 import { t } from "./services/i18n.js";
 
-bundleService.getWidgetBundlesByParent().then(widgetBundles => {
+bundleService.getWidgetBundlesByParent().then(async widgetBundles => {
+    await appContext.earlyInit();
+    
+    // A dynamic import is required for layouts since they initialize components which require translations.
+    const DesktopLayout = (await import("./layouts/desktop_layout.js")).default;
+
     appContext.setLayout(new DesktopLayout(widgetBundles));    
     appContext.start()
         .catch((e) => {

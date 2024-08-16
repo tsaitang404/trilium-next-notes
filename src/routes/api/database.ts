@@ -7,6 +7,8 @@ import anonymizationService from "../../services/anonymization.js";
 import consistencyChecksService from "../../services/consistency_checks.js";
 import { Request } from 'express';
 import ValidationError from "../../errors/validation_error.js";
+import sql_init from "../../services/sql_init.js";
+import becca_loader from "../../becca/becca_loader.js";
 
 function getExistingBackups() {
     return backupService.getExistingBackups();
@@ -26,6 +28,12 @@ function vacuumDatabase() {
 
 function findAndFixConsistencyIssues() {
     consistencyChecksService.runOnDemandChecks(true);
+}
+
+async function rebuildIntegrationTestDatabase() {
+    sql.rebuildIntegrationTestDatabase();
+    sql_init.initializeDb();
+    becca_loader.load();
 }
 
 function getExistingAnonymizedDatabases() {
@@ -54,6 +62,7 @@ export default {
     backupDatabase,
     vacuumDatabase,
     findAndFixConsistencyIssues,
+    rebuildIntegrationTestDatabase,
     getExistingAnonymizedDatabases,
     anonymize,
     checkIntegrity

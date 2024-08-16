@@ -14,17 +14,28 @@ import ws from "./ws.js";
 import becca_loader from "../becca/becca_loader.js";
 import entity_changes from "./entity_changes.js";
 
-function buildDatabase(path: string) {
+let dbConnection: DatabaseType = buildDatabase();
+let statementCache: Record<string, Statement> = {};
+
+function buildDatabase() {
     if (process.env.TRILIUM_INTEGRATION_TEST === "memory") {
-        // This allows a database that is read normally but is kept in memory and discards all modifications.
-        const dbBuffer = fs.readFileSync(path);
-        return new Database(dbBuffer);
+        return buildIntegrationTestDatabase();        
     }
 
     return new Database(dataDir.DOCUMENT_PATH);
 }
 
-const dbConnection: DatabaseType = buildDatabase(dataDir.DOCUMENT_PATH);
+function buildIntegrationTestDatabase() {
+    const dbBuffer = fs.readFileSync(dataDir.DOCUMENT_PATH);
+    return new Database(dbBuffer);
+}
+
+function rebuildIntegrationTestDatabase() {
+    // This allows a database that is read normally but is kept in memory and discards all modifications.
+    dbConnection = buildIntegrationTestDatabase();
+    statementCache = {};
+}
+
 
 if (!process.env.TRILIUM_INTEGRATION_TEST) {
     dbConnection.pragma('journal_mode = WAL');
@@ -95,8 +106,6 @@ function upsert<T extends {}>(tableName: string, primaryKey: string, rec: T) {
 
     execute(query, rec);
 }
-
-const statementCache: Record<string, Statement> = {};
 
 function stmt(sql: string) {
     if (!(sql in statementCache)) {
@@ -302,7 +311,7 @@ function fillParamList(paramIds: string[] | Set<string>, truncate = true) {
         paramIds = paramIds.slice(0, 30000);
     }
 
-    // doing it manually to avoid this showing up on the sloq query list
+    // doing it manually to avoid this showing up on the slow query list
     const s = stmt(`INSERT INTO param_list VALUES ${paramIds.map(paramId => `(?)`).join(',')}`);
 
     s.run(paramIds);
@@ -403,5 +412,6 @@ export default {
     upsert,
     fillParamList,
     copyDatabase,
-    disableSlowQueryLogging
+    disableSlowQueryLogging,
+    rebuildIntegrationTestDatabase
 };

@@ -18,6 +18,7 @@ cert.key
 cert.crt
 server-package.json
 .idea/httpRequests/
+.idea/shelf/
 data/
 data-test/
 tmp/

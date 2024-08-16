@@ -58,7 +58,8 @@ const ALLOWED_OPTIONS = new Set([
     'customSearchEngineName',
     'customSearchEngineUrl',
     'promotedAttributesOpenInRibbon',
-    'editedNotesOpenInRibbon'
+    'editedNotesOpenInRibbon',
+    'locale'
 ]);
 
 function getOptions() {
@@ -129,6 +130,24 @@ function getUserThemes() {
     return ret;
 }
 
+function getSupportedLocales() {
+    // TODO: Currently hardcoded, needs to read the list of available languages.
+    return [
+        {
+            "id": "en",
+            "name": "English"
+        },
+        {
+            "id": "es",
+            "name": "Español"
+        },
+        {
+            "id": "cn",
+            "name": "简体中文"
+        }
+    ];
+}
+
 function isAllowed(name: string) {
     return ALLOWED_OPTIONS.has(name)
         || name.startsWith("keyboardShortcuts")
@@ -140,5 +159,6 @@ export default {
     getOptions,
     updateOption,
     updateOptions,
-    getUserThemes
+    getUserThemes,
+    getSupportedLocales
 };
