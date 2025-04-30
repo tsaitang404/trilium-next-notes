@@ -12,6 +12,13 @@ module.exports = function (filePath) {
         return;
     }
 
+    const outputDir = path.join(__dirname, "sign");
+    if (!fs.existsSync(outputDir)) {
+      fs.mkdirSync(outputDir);
+    }
+
+    fs.copyFileSync(sourcePath, destPath);
+
     const command = `${WINDOWS_SIGN_EXECUTABLE} --executable "${filePath}"`;
     console.log(`[Sign] ${command}`);
 
