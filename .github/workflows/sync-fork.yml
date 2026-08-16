@@ -45,6 +45,6 @@ jobs:
         run: |
           # fetch mirror script from maintenance branch (develop is pure upstream, script lives in maintenance)
           git fetch origin maintenance
-          git show maintenance:scripts/mirror-releases.sh > /tmp/mirror-releases.sh
+          git show FETCH_HEAD:scripts/mirror-releases.sh > /tmp/mirror-releases.sh
           chmod +x /tmp/mirror-releases.sh
           /tmp/mirror-releases.sh TriliumNext/Notes tsaitang404/trilium-next-notes
