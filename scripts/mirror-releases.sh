@@ -17,11 +17,11 @@ for TAG in $UP_RELEASES; do
   fi
   echo "mirror $TAG"
 
-  # ensure tag exists on fork
+  # ensure tag exists on fork (use git push, gh api refs POST gets 403 with GITHUB_TOKEN)
   if ! gh api "repos/$FORK/git/refs/tags/$TAG" >/dev/null 2>&1; then
-    UP_SHA=$(gh api "repos/$UP/git/refs/tags/$TAG" --jq '.object.sha')
-    gh api "repos/$FORK/git/refs" -X POST -f "ref=refs/tags/$TAG" -f "sha=$UP_SHA" >/dev/null
-    echo "  tag created"
+    git fetch "https://github.com/$UP.git" "refs/tags/$TAG:refs/tags/$TAG" 2>/dev/null || true
+    git push "https://x-access-token:${GH_TOKEN}@github.com/$FORK.git" "refs/tags/$TAG:refs/tags/$TAG" 2>/dev/null || echo "  tag push failed (may exist)"
+    echo "  tag ensured"
   fi
 
   # copy release (title/body/prerelease)
