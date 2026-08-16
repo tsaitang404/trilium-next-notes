@@ -1,13 +1,16 @@
 #!/usr/bin/env bash
 # Mirror upstream releases (tag + title + body + assets) to this fork.
-# Usage: mirror-releases.sh <upstream_repo> <fork_repo>
+# Usage: mirror-releases.sh <upstream_repo> <fork_repo> [max_releases]
 # Env: GH_TOKEN (required for asset download/upload)
 set -e
 
 UP="$1"
 FORK="$2"
+# Mirror only the most recent N releases (default 5) to keep runs fast;
+# older releases are a one-time history migration, not needed incrementally.
+MAX="${3:-5}"
 
-UP_RELEASES=$(gh api "repos/$UP/releases?per_page=100" --jq '.[] | select(.draft==false) | .tag_name')
+UP_RELEASES=$(gh api "repos/$UP/releases?per_page=$MAX" --jq '.[] | select(.draft==false) | .tag_name')
 
 for TAG in $UP_RELEASES; do
   # skip if fork already has this release
