@@ -34,12 +34,11 @@ jobs:
           cd ../..
           git commit -m "chore: prune upstream workflows (keep release.yml only)" --allow-empty
           git push --force origin develop
-          # Push version tags only if missing on fork (skip existing to avoid clobber errors)
+          # Push version tags missing on fork (one ls-remote call, then push only absent ones)
+          EXISTING=$(git ls-remote --tags origin | awk '{print $2}' | sed 's|refs/tags/||' | grep -v '\^{}')
           git tag | grep -E '^v[0-9]' | while read -r t; do
-            if git ls-remote --exit-code --tags origin "refs/tags/$t" >/dev/null 2>&1; then
-              continue
-            fi
-            git push origin "refs/tags/$t:refs/tags/$t" 2>/dev/null || echo "tag $t push failed"
+            echo "$EXISTING" | grep -qx "$t" && continue
+            git push origin "refs/tags/$t:refs/tags/$t" 2>/dev/null || true
           done
 
       - name: Mirror upstream releases
@@ -50,4 +49,4 @@ jobs:
           git fetch origin maintenance
           git show FETCH_HEAD:scripts/mirror-releases.sh > /tmp/mirror-releases.sh
           chmod +x /tmp/mirror-releases.sh
-          /tmp/mirror-releases.sh TriliumNext/Notes tsaitang404/trilium-next-notes
+          /tmp/mirror-releases.sh TriliumNext/Notes tsaitang404/trilium-next-notes 5
