@@ -34,12 +34,7 @@ jobs:
           cd ../..
           git commit -m "chore: prune upstream workflows (keep release.yml only)" --allow-empty
           git push --force origin develop
-          # Push version tags missing on fork (one ls-remote call, then push only absent ones)
-          EXISTING=$(git ls-remote --tags origin | awk '{print $2}' | sed 's|refs/tags/||' | grep -v '\^{}')
-          git tag | grep -E '^v[0-9]' | while read -r t; do
-            echo "$EXISTING" | grep -qx "$t" && continue
-            git push origin "refs/tags/$t:refs/tags/$t" 2>/dev/null || true
-          done
+          # Tags are synced by mirror-releases.sh (git fetch + push per missing tag)
 
       - name: Mirror upstream releases
         env:
