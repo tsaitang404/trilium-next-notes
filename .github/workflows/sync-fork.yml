@@ -22,7 +22,7 @@ jobs:
           git config user.name "tsaitang404"
           git config user.email "tsaitang.agent@gmail.com"
           git remote add upstream "https://github.com/TriliumNext/Notes.git"
-          git fetch upstream develop --tags
+          git fetch upstream develop
           git checkout develop
           # Reset to pure upstream (prune commits re-applied below)
           git reset --hard "upstream/develop"
