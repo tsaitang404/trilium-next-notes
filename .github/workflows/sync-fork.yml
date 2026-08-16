@@ -16,18 +16,17 @@ jobs:
         with:
           fetch-depth: 0
           ref: develop
-      - name: Sync with upstream
+
+      - name: Sync code with upstream
         run: |
           git config user.name "tsaitang404"
           git config user.email "tsaitang.agent@gmail.com"
           git remote add upstream "https://github.com/TriliumNext/Notes.git"
-          git fetch upstream develop
+          git fetch upstream develop --tags
           git checkout develop
-          # Reset to pure upstream (discard local prune commits; they are re-applied below)
+          # Reset to pure upstream (prune commits re-applied below)
           git reset --hard "upstream/develop"
-          # Prune upstream workflows; keep only release.yml (tag release builds)
-          # Remove: CI checks (codeql/dev/main-docker/nightly/playwright)
-          #         + winget publish (no WINGET_PAT on this fork)
+          # Prune upstream workflows; keep only release.yml
           cd .github/workflows
           for f in codeql.yml dev.yml main-docker.yml nightly.yml playwright.yml release-winget.yml; do
             if [ -f "$f" ]; then git rm --quiet "$f"; fi
@@ -35,3 +34,14 @@ jobs:
           cd ../..
           git commit -m "chore: prune upstream workflows (keep release.yml only)" --allow-empty
           git push --force origin develop
+          git push origin --tags --force
+
+      - name: Mirror upstream releases
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # fetch mirror script from maintenance branch (develop is pure upstream, script lives in maintenance)
+          git fetch origin maintenance
+          git show maintenance:scripts/mirror-releases.sh > /tmp/mirror-releases.sh
+          chmod +x /tmp/mirror-releases.sh
+          /tmp/mirror-releases.sh TriliumNext/Notes tsaitang404/trilium-next-notes
