@@ -34,9 +34,12 @@ jobs:
           cd ../..
           git commit -m "chore: prune upstream workflows (keep release.yml only)" --allow-empty
           git push --force origin develop
-          # Push version tags only (skip nightly which may conflict)
+          # Push version tags only if missing on fork (skip existing to avoid clobber errors)
           git tag | grep -E '^v[0-9]' | while read -r t; do
-            git push --force origin "refs/tags/$t:refs/tags/$t" 2>/dev/null || echo "tag $t push failed (may exist)"
+            if git ls-remote --exit-code --tags origin "refs/tags/$t" >/dev/null 2>&1; then
+              continue
+            fi
+            git push origin "refs/tags/$t:refs/tags/$t" 2>/dev/null || echo "tag $t push failed"
           done
 
       - name: Mirror upstream releases
