@@ -22,4 +22,13 @@ jobs:
           git fetch upstream develop
           git checkout develop
           git merge "upstream/develop" --ff-only
+          # Keep only release workflows; remove upstream CI workflows
+          # (codeql/dev/main-docker/nightly/playwright) so they don't
+          # run on this fork. release.yml + release-winget.yml are kept.
+          cd .github/workflows
+          for f in codeql.yml dev.yml main-docker.yml nightly.yml playwright.yml; do
+            if [ -f "$f" ]; then git rm --quiet "$f"; fi
+          done
+          cd ../..
+          git commit -m "chore: prune upstream CI workflows (keep release only)" --allow-empty
           git push origin develop
